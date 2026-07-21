@@ -2,17 +2,30 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, FileText } from 'lucide-react'
 import { theme } from '../theme'
 
-function RegistryDetail({ backTo, columns, record, title }) {
-  if (!record) {
+function RegistryDetail({
+  backTo,
+  columns,
+  errorMessage,
+  isLoading = false,
+  record,
+  title,
+}) {
+  if (isLoading || errorMessage || !record) {
     return (
       <section
         className={`rounded-2xl border p-6 ${theme.classes.dashboardSurface}`}
       >
         <h2 className={`text-lg font-bold ${theme.classes.heading}`}>
-          Record not found
+          {isLoading
+            ? 'Loading record'
+            : errorMessage
+              ? 'Could not load record'
+              : 'Record not found'}
         </h2>
         <p className={`mt-2 text-sm ${theme.classes.muted}`}>
-          The selected record could not be found.
+          {isLoading
+            ? 'Please wait while the full details are loaded.'
+            : errorMessage || 'The selected record could not be found.'}
         </p>
         <Link
           className={`mt-5 inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}

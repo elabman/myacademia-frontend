@@ -17,6 +17,7 @@ export const theme = {
     googleRed: '#FF3D00',
     googleGreen: '#4CAF50',
     googleBlue: '#1976D2',
+    facebookBlue: '#1877F2',
   },
   classes: {
     page: 'bg-[#eef0fb]',
@@ -38,11 +39,17 @@ export const theme = {
     iconHover: 'hover:bg-slate-50 hover:text-slate-600',
     field:
       'border-slate-200 placeholder-slate-400 focus:border-indigo-400 focus:ring-indigo-500/40',
+    formBar: 'border-emerald-500 bg-slate-100 text-slate-800',
+    formControl:
+      'border-slate-200 bg-white text-slate-700 placeholder-slate-400 focus:border-indigo-400 focus:ring-indigo-500/30',
+    errorBox: 'border-red-200 bg-red-50 text-red-700',
+    errorText: 'text-red-700',
     checkbox: 'border-slate-300 text-indigo-600 focus:ring-indigo-500/40',
     divider: 'bg-slate-200',
     socialButton: 'border-slate-200 text-slate-700 hover:bg-slate-50',
     primaryButton:
       'bg-gradient-to-r from-[#6d5df5] to-[#5647e0] text-white shadow-indigo-500/25 hover:shadow-indigo-500/40',
+    dangerButton: 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100',
     ringStrong: 'border-indigo-200/60',
     ringSoft: 'border-indigo-200/40',
     dot: 'bg-indigo-200',
@@ -64,6 +71,16 @@ export const theme = {
     dashboardNavItem: 'text-white/78 hover:bg-white/10 hover:text-white',
     dashboardTopbar: 'border-slate-200 bg-white',
     dashboardSurface: 'border-slate-200 bg-white shadow-sm shadow-slate-200/60',
+    dashboardInset: 'border-slate-100 bg-slate-50/60',
+    dashboardMutedSurface: 'border-slate-200 bg-slate-50/70',
+    dashboardSoftSurface: 'bg-slate-50',
+    dashboardInfoPanel: 'border-indigo-100 bg-indigo-50/70',
+    dashboardActionCard:
+      'border-slate-200 bg-white hover:border-indigo-200 hover:bg-indigo-50/40 hover:shadow-md',
+    dashboardAccentText: 'text-indigo-600',
+    dashboardSuccessText: 'text-emerald-600',
+    dashboardWarningText: 'text-amber-600',
+    dashboardDangerText: 'text-rose-600',
     dashboardIconUsers: 'bg-indigo-50 text-indigo-600',
     dashboardIconMessages: 'bg-emerald-50 text-emerald-600',
     dashboardIconReports: 'bg-amber-50 text-amber-500',
@@ -81,6 +98,8 @@ export const theme = {
       'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
     tableSearch:
       'border-slate-200 bg-white placeholder-slate-400 focus:border-indigo-400 focus:ring-indigo-500/40',
+    progressTrack: 'bg-slate-100',
+    progressFill: 'bg-emerald-500',
     statusActive: 'bg-emerald-50 text-emerald-700',
     statusPipeline: 'bg-amber-50 text-amber-700',
     statusCompleted: 'bg-indigo-50 text-indigo-700',

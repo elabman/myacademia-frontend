@@ -5,9 +5,25 @@ import { theme } from '../theme'
 
 function LoginForm({ onLogin }) {
   const [email, setEmail] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setErrorMessage('')
+    setIsSubmitting(true)
+
+    try {
+      await onLogin({ email, password, rememberMe })
+    } catch (error) {
+      setErrorMessage(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <section className="flex flex-col justify-center px-5 py-7 sm:p-10 lg:p-12">
@@ -30,11 +46,16 @@ function LoginForm({ onLogin }) {
 
         <form
           className="space-y-4 sm:space-y-5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            onLogin()
-          }}
+          onSubmit={handleSubmit}
         >
+          {errorMessage && (
+            <div
+              className={`rounded-xl border px-4 py-3 text-sm ${theme.classes.errorBox}`}
+            >
+              {errorMessage}
+            </div>
+          )}
+
           <div>
             <label
               htmlFor="email"
@@ -48,6 +69,7 @@ function LoginForm({ onLogin }) {
                 size={18}
               />
               <input
+                disabled={isSubmitting}
                 id="email"
                 type="email"
                 value={email}
@@ -72,6 +94,7 @@ function LoginForm({ onLogin }) {
                 size={18}
               />
               <input
+                disabled={isSubmitting}
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -81,6 +104,7 @@ function LoginForm({ onLogin }) {
                 className={`w-full rounded-xl border py-2.5 pl-11 pr-11 text-sm transition focus:outline-none focus:ring-2 sm:py-3 ${theme.classes.field}`}
               />
               <button
+                disabled={isSubmitting}
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
                 className={`absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg transition ${theme.classes.icon} ${theme.classes.iconHover}`}
@@ -94,6 +118,7 @@ function LoginForm({ onLogin }) {
           <div className="flex flex-col gap-3 text-xs sm:text-sm min-[380px]:flex-row min-[380px]:items-center min-[380px]:justify-between">
             <label className="flex cursor-pointer select-none items-center gap-2">
               <input
+                disabled={isSubmitting}
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(event) => setRememberMe(event.target.checked)}
@@ -107,10 +132,11 @@ function LoginForm({ onLogin }) {
           </div>
 
           <button
+            disabled={isSubmitting}
             type="submit"
-            className={`w-full rounded-xl py-2.5 font-semibold shadow-lg transition hover:brightness-105 active:scale-[0.99] sm:py-3 ${theme.classes.primaryButton}`}
+            className={`w-full rounded-xl py-2.5 font-semibold shadow-lg transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:py-3 ${theme.classes.primaryButton}`}
           >
-            Log In
+            {isSubmitting ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
@@ -185,7 +211,7 @@ function FacebookIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
       <path
-        fill="#1877F2"
+        fill={theme.colors.facebookBlue}
         d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.03 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.96h-1.51c-1.49 0-1.96.93-1.96 1.89v2.27h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"
       />
     </svg>

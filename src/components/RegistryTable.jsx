@@ -2,15 +2,30 @@ import { Link } from 'react-router-dom'
 import {
   Download,
   Eye,
+  Pencil,
   Plus,
   Search,
   SlidersHorizontal,
+  Trash2,
   X,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { theme } from '../theme'
 
-function RegistryTable({ addTo, columns, eyebrow, quickColumns, rows, title }) {
+function RegistryTable({
+  addTo,
+  columns,
+  emptyMessage = 'No records found.',
+  errorMessage,
+  eyebrow,
+  isLoading = false,
+  isDeletingId,
+  onDeleteRow,
+  onRefresh,
+  quickColumns,
+  rows,
+  title,
+}) {
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const defaultVisibleColumns =
@@ -70,6 +85,15 @@ function RegistryTable({ addTo, columns, eyebrow, quickColumns, rows, title }) {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            {onRefresh && (
+              <button
+                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
+                onClick={onRefresh}
+                type="button"
+              >
+                Refresh
+              </button>
+            )}
             <button
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
               type="button"
@@ -100,7 +124,7 @@ function RegistryTable({ addTo, columns, eyebrow, quickColumns, rows, title }) {
             <thead className={theme.classes.tableHeader}>
               <tr>
                 <th className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}>
-                  View
+                  Actions
                 </th>
                 {quickColumnEntries.map(([, label]) => (
                   <th
@@ -113,35 +137,47 @@ function RegistryTable({ addTo, columns, eyebrow, quickColumns, rows, title }) {
               </tr>
             </thead>
             <tbody>
-              {filteredRows.map((row) => (
-                <tr
-                  className={`align-top transition ${theme.classes.tableRowHover}`}
-                  key={row.sn}
-                >
-                  <td className={`border-b px-3 py-3 ${theme.classes.tableRowDivider}`}>
-                    <Link
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${theme.classes.tableToolbarButton}`}
-                      aria-label="View details"
-                      to={`${row.sn}`}
-                    >
-                      <Eye size={16} />
-                    </Link>
+              {isLoading && (
+                <tr>
+                  <td
+                    className={`border-b px-3 py-8 text-center ${theme.classes.tableRowDivider} ${theme.classes.muted}`}
+                    colSpan={quickColumnEntries.length + 1}
+                  >
+                    Loading {title.toLowerCase()}...
                   </td>
-                  {quickColumnEntries.map(([key]) => (
-                    <td
-                      className={`border-b px-3 py-3 ${
-                        key === 'title' ? 'min-w-72 font-medium' : 'whitespace-nowrap'
-                      } ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
-                      key={key}
-                    >
-                      {key === 'status' ? (
-                        <StatusPill value={row[key]} />
-                      ) : (
-                        row[key]
-                      )}
-                    </td>
-                  ))}
                 </tr>
+              )}
+
+              {!isLoading && errorMessage && (
+                <tr>
+                  <td
+                    className={`border-b px-3 py-8 text-center ${theme.classes.tableRowDivider} ${theme.classes.errorText}`}
+                    colSpan={quickColumnEntries.length + 1}
+                  >
+                    {errorMessage}
+                  </td>
+                </tr>
+              )}
+
+              {!isLoading && !errorMessage && filteredRows.length === 0 && (
+                <tr>
+                  <td
+                    className={`border-b px-3 py-8 text-center ${theme.classes.tableRowDivider} ${theme.classes.muted}`}
+                    colSpan={quickColumnEntries.length + 1}
+                  >
+                    {emptyMessage}
+                  </td>
+                </tr>
+              )}
+
+              {!isLoading && !errorMessage && filteredRows.map((row) => (
+                <TableRow
+                  isDeleting={String(isDeletingId) === String(row.id ?? row.sn)}
+                  key={row.id ?? row.sn}
+                  onDeleteRow={onDeleteRow}
+                  quickColumnEntries={quickColumnEntries}
+                  row={row}
+                />
               ))}
             </tbody>
           </table>
@@ -191,6 +227,57 @@ function RegistryTable({ addTo, columns, eyebrow, quickColumns, rows, title }) {
         />
       )}
     </section>
+  )
+}
+
+function TableRow({ isDeleting, onDeleteRow, quickColumnEntries, row }) {
+  const rowId = row.id ?? row.sn
+
+  return (
+    <tr className={`align-top transition ${theme.classes.tableRowHover}`}>
+      <td className={`border-b px-3 py-3 ${theme.classes.tableRowDivider}`}>
+        <div className="flex items-center gap-1.5">
+          <Link
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${theme.classes.tableToolbarButton}`}
+            aria-label="View details"
+            title="View details"
+            to={`${rowId}`}
+          >
+            <Eye size={16} />
+          </Link>
+          <Link
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${theme.classes.tableToolbarButton}`}
+            aria-label="Edit record"
+            title="Edit record"
+            to={`${rowId}/edit`}
+          >
+            <Pencil size={15} />
+          </Link>
+          {onDeleteRow && (
+            <button
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-60 ${theme.classes.dangerButton}`}
+              aria-label="Delete record"
+              disabled={isDeleting}
+              onClick={() => onDeleteRow(row)}
+              title="Delete record"
+              type="button"
+            >
+              <Trash2 size={15} />
+            </button>
+          )}
+        </div>
+      </td>
+      {quickColumnEntries.map(([key]) => (
+        <td
+          className={`border-b px-3 py-3 ${
+            key === 'title' ? 'min-w-72 font-medium' : 'whitespace-nowrap'
+          } ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
+          key={key}
+        >
+          {key === 'status' ? <StatusPill value={row[key]} /> : row[key]}
+        </td>
+      ))}
+    </tr>
   )
 }
 
