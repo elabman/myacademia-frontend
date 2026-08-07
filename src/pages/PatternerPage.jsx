@@ -8,29 +8,29 @@ import {
 
 const columns = [
   { key: 'id', label: 'ID' },
-  { key: 'donor_name', label: 'Donor' },
+  { key: 'donor_name', label: 'Partner' },
   { key: 'name', label: 'Name' },
 ]
 
 const fields = [
-  { name: 'donor_name', label: 'Donor Name', required: true },
+  { name: 'donor_name', label: 'Partner Name', required: true },
 ]
 
-function DonorsPage() {
+function PatternerPage() {
   return (
     <MasterDataPage
       columns={columns}
       createRecord={createDonor}
       deleteRecord={deleteDonor}
-      emptyMessage="No donors were returned by the API."
-      eyebrow="Funding Agencies"
+      emptyMessage="No partners were returned by the API."
+      eyebrow="Partner Organisations"
       fields={fields}
       idKeys={['id', 'donor_id']}
       listRecords={listDonors}
-      title="Donors"
+      title="Partners"
       updateRecord={updateDonor}
     />
   )
 }
 
-export default DonorsPage
+export default PatternerPage

@@ -25,7 +25,7 @@ const quickActions = [
   {
     icon: FilePlus2,
     label: 'Add Project',
-    supporting: 'Register donor and partner work',
+    supporting: 'Register partner project work',
     to: '/dashboard/projects/new',
   },
   {

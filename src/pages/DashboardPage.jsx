@@ -24,7 +24,7 @@ const navigation = [
     label: 'Short Courses',
     icon: BookOpenCheck,
   },
-  { to: '/dashboard/donors', label: 'Donors', icon: FolderKanban },
+  { to: '/dashboard/partners', label: 'Partners', icon: FolderKanban },
   { to: '/dashboard/approvals', label: 'Approvals', icon: ClipboardCheck },
   { to: '/dashboard/admin', label: 'Admin', icon: Settings },
 ]
@@ -102,8 +102,8 @@ function getPageTitle(pathname) {
     return 'Short Courses'
   }
 
-  if (pathname === '/dashboard/donors') {
-    return 'Donors'
+  if (pathname === '/dashboard/partners' || pathname === '/dashboard/donors') {
+    return 'Partners'
   }
 
   if (pathname === '/dashboard/admin') {

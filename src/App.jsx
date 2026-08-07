@@ -13,7 +13,7 @@ import AuditLogPage from './pages/AuditLogPage'
 import DashboardPage from './pages/DashboardPage'
 import DashboardHomePage from './pages/DashboardHomePage'
 import DepartmentsPage from './pages/DepartmentsPage'
-import DonorsPage from './pages/DonorsPage'
+import PatternerPage from './pages/PatternerPage'
 import LoginPage from './pages/LoginPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import ProjectEditPage from './pages/ProjectEditPage'
@@ -116,7 +116,11 @@ function App() {
               path="short-courses/:courseId"
               element={<ShortCourseDetailPage />}
             />
-            <Route path="donors" element={<DonorsPage />} />
+            <Route path="partners" element={<PatternerPage />} />
+            <Route
+              path="donors"
+              element={<Navigate replace to="/dashboard/partners" />}
+            />
             <Route path="admin" element={<AdminPage />} />
             <Route path="admin/users" element={<UsersPage />} />
             <Route path="admin/departments" element={<DepartmentsPage />} />
