@@ -164,6 +164,112 @@ export async function getShortCoursesSummary(accessToken) {
   return unwrapData(await apiRequest('/short-courses/summary', { accessToken }))
 }
 
+export async function listMouAgreements(accessToken, params = {}) {
+  const payload = await apiRequest(
+    `/mou-agreements${createQueryString(params)}`,
+    { accessToken },
+  )
+
+  return {
+    meta: unwrapMeta(payload),
+    rows: unwrapList(payload).map(normalizeMouAgreement),
+  }
+}
+
+export async function getMouAgreementsSummary(accessToken) {
+  return unwrapData(await apiRequest('/mou-agreements/summary', { accessToken }))
+}
+
+export async function listExpiringMouAgreements(accessToken, days = 90) {
+  return unwrapList(
+    await apiRequest(`/mou-agreements/expiring?days=${days}`, { accessToken }),
+  ).map(normalizeMouAgreement)
+}
+
+export async function getMouAgreement(accessToken, mouId) {
+  try {
+    const payload = await apiRequest(`/mou-agreements/${mouId}/full`, {
+      accessToken,
+    })
+    return normalizeMouAgreement(unwrapData(payload))
+  } catch {
+    const payload = await apiRequest(`/mou-agreements/${mouId}`, { accessToken })
+    return normalizeMouAgreement(unwrapData(payload))
+  }
+}
+
+export async function createMouAgreement(accessToken, formData) {
+  const payload = await apiRequest('/mou-agreements', {
+    accessToken,
+    body: toMouAgreementPayload(formData),
+    method: 'POST',
+  })
+
+  const createdMou = unwrapData(payload)
+  const mouId = createdMou?.id ?? createdMou?.mou_agreement_id
+
+  if (mouId && formData.collaborationArea) {
+    await linkMouCollaborationArea(accessToken, mouId, formData.collaborationArea)
+  }
+
+  return createdMou
+}
+
+export async function updateMouAgreement(accessToken, mouId, formData) {
+  const payload = await apiRequest(`/mou-agreements/${mouId}`, {
+    accessToken,
+    body: toMouAgreementPayload(formData),
+    method: 'PUT',
+  })
+
+  if (formData.collaborationArea) {
+    await linkMouCollaborationArea(accessToken, mouId, formData.collaborationArea)
+  }
+
+  return unwrapData(payload)
+}
+
+export async function deleteMouAgreement(accessToken, mouId) {
+  return apiRequest(`/mou-agreements/${mouId}`, {
+    accessToken,
+    method: 'DELETE',
+  })
+}
+
+export async function listMouCollaborationAreas(accessToken, mouId) {
+  return unwrapList(
+    await apiRequest(`/mou-agreements/${mouId}/collaboration-areas`, {
+      accessToken,
+    }),
+  )
+}
+
+export async function linkMouCollaborationArea(
+  accessToken,
+  mouId,
+  collaborationAreaId,
+) {
+  return apiRequest(`/mou-agreements/${mouId}/collaboration-areas`, {
+    accessToken,
+    body: { collaboration_area_id: Number(collaborationAreaId) },
+    method: 'POST',
+  })
+}
+
+export async function unlinkMouCollaborationArea(
+  accessToken,
+  mouId,
+  collaborationAreaId,
+) {
+  return apiRequest(
+    `/mou-agreements/${mouId}/collaboration-areas/${collaborationAreaId}`,
+    {
+      accessToken,
+      method: 'DELETE',
+    },
+  )
+}
+
 export async function listDepartments(accessToken) {
   return unwrapList(await apiRequest('/departments', { accessToken }))
 }
@@ -259,6 +365,14 @@ export async function deleteSector(accessToken, sectorId) {
 
 export async function listAcademicYears(accessToken) {
   return unwrapList(await apiRequest('/academic-years', { accessToken }))
+}
+
+export async function listPartnerTypes(accessToken) {
+  return unwrapList(await apiRequest('/partner-types', { accessToken }))
+}
+
+export async function listCollaborationAreas(accessToken) {
+  return unwrapList(await apiRequest('/collaboration-areas', { accessToken }))
 }
 
 export async function createAcademicYear(accessToken, data) {
@@ -467,6 +581,46 @@ function normalizeShortCourse(course) {
   }
 }
 
+function normalizeMouAgreement(mou) {
+  return {
+    id: value(mou, ['id', 'mou_agreement_id']),
+    sn: value(mou, ['sn', 'serial_number', 'id', 'mou_agreement_id']),
+    partner: value(mou, ['partner', 'partner_name', 'donor_name', 'partner_id']),
+    partnerId: optionalValue(mou, ['partner_id']),
+    partnerType: value(mou, ['partner_type', 'partner_type_name', 'type_name', 'partner_type_id']),
+    partnerTypeId: optionalValue(mou, ['partner_type_id']),
+    country: value(mou, ['country']),
+    contactPerson: value(mou, ['contactPerson', 'contact_person']),
+    contactPosition: value(mou, ['contactPosition', 'contact_position']),
+    contactEmail: value(mou, ['contactEmail', 'contact_email']),
+    contactPhone: value(mou, ['contactPhone', 'contact_phone']),
+    dateSigned: formatDate(value(mou, ['dateSigned', 'date_signed'])),
+    effectiveDate: formatDate(value(mou, ['effectiveDate', 'effective_date'])),
+    expiryDate: formatDate(value(mou, ['expiryDate', 'expiry_date'])),
+    durationLabel: value(mou, ['durationLabel', 'duration_label']),
+    objectives: value(mou, ['objectives', 'purpose_objectives']),
+    department: value(mou, [
+      'department',
+      'department_name',
+      'responsible_department',
+      'responsible_department_id',
+    ]),
+    departmentId: optionalValue(mou, ['responsible_department_id', 'department_id']),
+    status: value(mou, ['status']),
+    renewalRequired: booleanLabel(value(mou, ['renewalRequired', 'renewal_required'])),
+    lastReviewDate: formatDate(value(mou, ['lastReviewDate', 'last_review_date'])),
+    deliverables: value(mou, ['deliverables', 'key_deliverables']),
+    progressStatus: value(mou, ['progressStatus', 'progress_status']),
+    nextAction: value(mou, ['nextAction', 'next_action']),
+    collaborationArea: listValue(mou, [
+      'collaborationArea',
+      'collaboration_area',
+      'collaboration_areas',
+    ]),
+    collaborationAreaId: optionalValue(mou, ['collaboration_area_id']),
+  }
+}
+
 function toProjectPayload(formData) {
   return removeBlank({
     project_title: formData.title,
@@ -516,9 +670,45 @@ function toShortCoursePayload(formData) {
   })
 }
 
+function toMouAgreementPayload(formData) {
+  return removeBlank({
+    partner_id: numberOrValue(formData.partner),
+    partner_type_id: numberOrValue(formData.partnerType),
+    country: formData.country,
+    contact_person: formData.contactPerson,
+    contact_position: formData.contactPosition,
+    contact_email: formData.contactEmail,
+    contact_phone: formData.contactPhone,
+    date_signed: formData.dateSigned,
+    effective_date: formData.effectiveDate,
+    expiry_date: formData.expiryDate,
+    duration_label: formData.durationLabel,
+    purpose_objectives: formData.objectives,
+    responsible_department_id: numberOrValue(formData.department),
+    status: formData.status,
+    renewal_required: numberOrValue(formData.renewalRequired),
+    last_review_date: formData.lastReviewDate,
+    key_deliverables: formData.deliverables,
+    progress_status: formData.progressStatus,
+    next_action: formData.nextAction,
+  })
+}
+
 function value(source, keys) {
   const key = keys.find((item) => source?.[item] !== undefined && source?.[item] !== null)
   return key ? source[key] : '-'
+}
+
+function booleanLabel(valueToFormat) {
+  if (valueToFormat === true || valueToFormat === 'true' || valueToFormat === 1) {
+    return 'Yes'
+  }
+
+  if (valueToFormat === false || valueToFormat === 'false' || valueToFormat === 0) {
+    return 'No'
+  }
+
+  return valueToFormat
 }
 
 function optionalValue(source, keys) {
@@ -531,7 +721,17 @@ function listValue(source, keys) {
 
   if (Array.isArray(foundValue)) {
     return foundValue
-      .map((item) => item.name || item.department_name || item.partner_name || item.full_name || item.title || item)
+      .map(
+        (item) =>
+          item.name ||
+          item.collaboration_area_name ||
+          item.area_name ||
+          item.department_name ||
+          item.partner_name ||
+          item.full_name ||
+          item.title ||
+          item,
+      )
       .join(', ')
   }
 

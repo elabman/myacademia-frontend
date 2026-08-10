@@ -3,6 +3,7 @@ import {
   BookOpenCheck,
   ChevronDown,
   ClipboardCheck,
+  FileText,
   FolderKanban,
   Home,
   LogOut,
@@ -24,6 +25,7 @@ const navigation = [
     label: 'Short Courses',
     icon: BookOpenCheck,
   },
+  { to: '/dashboard/mou-agreements', label: 'MoUs', icon: FileText },
   { to: '/dashboard/partners', label: 'Partners', icon: FolderKanban },
   { to: '/dashboard/approvals', label: 'Approvals', icon: ClipboardCheck },
   { to: '/dashboard/admin', label: 'Admin', icon: Settings },
@@ -100,6 +102,22 @@ function getPageTitle(pathname) {
 
   if (pathname === '/dashboard/short-courses') {
     return 'Short Courses'
+  }
+
+  if (pathname === '/dashboard/mou-agreements/new') {
+    return 'New MoU'
+  }
+
+  if (pathname.match(/^\/dashboard\/mou-agreements\/[^/]+\/edit$/)) {
+    return 'Edit MoU'
+  }
+
+  if (pathname.startsWith('/dashboard/mou-agreements/')) {
+    return 'MoU Details'
+  }
+
+  if (pathname === '/dashboard/mou-agreements') {
+    return 'MoU Agreements'
   }
 
   if (pathname === '/dashboard/partners' || pathname === '/dashboard/donors') {

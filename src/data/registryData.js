@@ -268,6 +268,30 @@ export const shortCourseColumns = [
   ['status', 'Status'],
 ]
 
+export const mouAgreementColumns = [
+  ['sn', 'S/N'],
+  ['partner', 'Partner Organisation'],
+  ['partnerType', 'Partner Type'],
+  ['country', 'Country'],
+  ['contactPerson', 'Contact Person'],
+  ['contactPosition', 'Contact Position'],
+  ['contactEmail', 'Contact Email'],
+  ['contactPhone', 'Contact Phone'],
+  ['dateSigned', 'Date Signed'],
+  ['effectiveDate', 'Effective Date'],
+  ['expiryDate', 'Expiry Date'],
+  ['durationLabel', 'Duration'],
+  ['objectives', 'Purpose / Objectives'],
+  ['department', 'Responsible Department'],
+  ['status', 'Status'],
+  ['renewalRequired', 'Renewal Required'],
+  ['lastReviewDate', 'Last Review Date'],
+  ['deliverables', 'Key Deliverables'],
+  ['progressStatus', 'Progress Status'],
+  ['nextAction', 'Next Action'],
+  ['collaborationArea', 'Collaboration Area'],
+]
+
 export const dashboardStats = [
   {
     label: 'Projects',

@@ -15,6 +15,10 @@ import DashboardHomePage from './pages/DashboardHomePage'
 import DepartmentsPage from './pages/DepartmentsPage'
 import PatternerPage from './pages/PatternerPage'
 import LoginPage from './pages/LoginPage'
+import MouAgreementDetailPage from './pages/MouAgreementDetailPage'
+import MouAgreementEditPage from './pages/MouAgreementEditPage'
+import MouAgreementFormPage from './pages/MouAgreementFormPage'
+import MouAgreementsPage from './pages/MouAgreementsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import ProjectEditPage from './pages/ProjectEditPage'
 import ProjectFormPage from './pages/ProjectFormPage'
@@ -115,6 +119,19 @@ function App() {
             <Route
               path="short-courses/:courseId"
               element={<ShortCourseDetailPage />}
+            />
+            <Route path="mou-agreements" element={<MouAgreementsPage />} />
+            <Route
+              path="mou-agreements/new"
+              element={<MouAgreementFormPage />}
+            />
+            <Route
+              path="mou-agreements/:mouId/edit"
+              element={<MouAgreementEditPage />}
+            />
+            <Route
+              path="mou-agreements/:mouId"
+              element={<MouAgreementDetailPage />}
             />
             <Route path="partners" element={<PatternerPage />} />
             <Route

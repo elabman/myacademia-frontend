@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useMemo, useState } from 'react'
+import { countryOptions } from '../data/countries'
 import { theme } from '../theme'
 
 function RegistryForm({
@@ -20,6 +21,8 @@ function RegistryForm({
   })
   const [projectDates, setProjectDates] = useState({
     endDate: inputDateValue(initialValue(initialValues, 'endDate')),
+    expiryDate: inputDateValue(initialValue(initialValues, 'expiryDate')),
+    effectiveDate: inputDateValue(initialValue(initialValues, 'effectiveDate')),
     startDate: inputDateValue(initialValue(initialValues, 'startDate')),
   })
 
@@ -38,6 +41,11 @@ function RegistryForm({
   )
   const durationMonths = useMemo(
     () => calculateDurationMonths(projectDates.startDate, projectDates.endDate),
+    [projectDates],
+  )
+  const mouDurationLabel = useMemo(
+    () =>
+      calculateDurationLabel(projectDates.effectiveDate, projectDates.expiryDate),
     [projectDates],
   )
 
@@ -93,6 +101,7 @@ function RegistryForm({
                 isSubmitting={isSubmitting}
                 initialValues={initialValues}
                 key={row.map(([key]) => key).join('-')}
+                mouDurationLabel={mouDurationLabel}
                 onParticipantChange={setParticipantCounts}
                 onProjectDateChange={setProjectDates}
                 participantCounts={participantCounts}
@@ -141,6 +150,7 @@ function FormRow({
   fields,
   isSubmitting,
   initialValues,
+  mouDurationLabel,
   onParticipantChange,
   onProjectDateChange,
   participantCounts,
@@ -170,6 +180,7 @@ function FormRow({
             durationMonths={durationMonths}
             isSubmitting={isSubmitting}
             initialValues={initialValues}
+            mouDurationLabel={mouDurationLabel}
             key={key}
             label={label}
             name={key}
@@ -191,6 +202,7 @@ function FormField({
   isSubmitting,
   initialValues,
   label,
+  mouDurationLabel,
   name,
   onParticipantChange,
   onProjectDateChange,
@@ -201,17 +213,34 @@ function FormField({
 }) {
   const config = fieldConfig(name, selectOptions)
   const isParticipantInput = name === 'female' || name === 'male'
-  const isProjectDateInput = name === 'startDate' || name === 'endDate'
+  const isProjectDateInput =
+    name === 'startDate' ||
+    name === 'endDate' ||
+    name === 'effectiveDate' ||
+    name === 'expiryDate'
   const isReadonlyDuration = name === 'duration'
+  const isReadonlyMouDuration = name === 'durationLabel'
   const isReadonlyTotal = name === 'total'
-  const defaultValue = initialValue(initialValues, name)
+  const inputType = fieldType(name)
+  const defaultValue =
+    inputType === 'date'
+      ? inputDateValue(initialValue(initialValues, name))
+      : initialValue(initialValues, name)
 
   return (
-    <label className="grid gap-1.5">
+    <div className="grid gap-1.5">
       <span className={`text-xs font-semibold ${theme.classes.subtle}`}>
         {label}
       </span>
-      {config.options ? (
+      {config.searchableOptions ? (
+        <SearchableSelect
+          defaultValue={defaultValue}
+          disabled={isSubmitting}
+          label={label}
+          name={name}
+          options={config.searchableOptions}
+        />
+      ) : config.options ? (
         <select
           className={`w-full border px-3 py-2 text-sm transition focus:outline-none focus:ring-2 ${theme.classes.formControl}`}
           defaultValue={defaultValue}
@@ -256,8 +285,8 @@ function FormField({
                     }))
               : undefined
           }
-          readOnly={isReadonlyTotal || isReadonlyDuration}
-          type={fieldType(name)}
+          readOnly={isReadonlyTotal || isReadonlyDuration || isReadonlyMouDuration}
+          type={inputType}
           value={
             isParticipantInput
               ? participantCounts[name]
@@ -266,14 +295,17 @@ function FormField({
               : isReadonlyTotal
                 ? totalParticipants
                 : isReadonlyDuration
-                  ? durationMonths
+                ? durationMonths
+                : isReadonlyMouDuration
+                  ? mouDurationLabel
                 : undefined
           }
           defaultValue={
             isParticipantInput ||
             isProjectDateInput ||
             isReadonlyTotal ||
-            isReadonlyDuration
+            isReadonlyDuration ||
+            isReadonlyMouDuration
               ? undefined
               : defaultValue
           }
@@ -282,12 +314,93 @@ function FormField({
       {config.hint && (
         <span className={`text-xs ${theme.classes.subtle}`}>{config.hint}</span>
       )}
-    </label>
+    </div>
+  )
+}
+
+function SearchableSelect({ defaultValue, disabled, label, name, options }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedValue, setSelectedValue] = useState(defaultValue || '')
+  const selectedOption = options.find(
+    (option) => String(option.value) === String(selectedValue),
+  )
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.trim().toLowerCase()),
+  )
+
+  const handleSelect = (value) => {
+    setSelectedValue(value)
+    setSearchTerm('')
+    setIsOpen(false)
+  }
+
+  return (
+    <div className="relative">
+      <input name={name} type="hidden" value={selectedValue} />
+      <button
+        className={`flex w-full items-center justify-between border px-3 py-2 text-left text-sm transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${theme.classes.formControl}`}
+        disabled={disabled}
+        onClick={() => setIsOpen((current) => !current)}
+        type="button"
+      >
+        <span className={selectedValue ? theme.classes.bodyText : theme.classes.subtle}>
+          {selectedOption?.label || `Select ${label.toLowerCase()}`}
+        </span>
+        <span className={theme.classes.subtle}>v</span>
+      </button>
+
+      {isOpen && (
+        <div
+          className={`absolute z-30 mt-1 w-full overflow-hidden rounded-xl border ${theme.classes.modalPanel}`}
+        >
+          <div className={`border-b p-2 ${theme.classes.tableDivider}`}>
+            <input
+              autoFocus
+              className={`w-full border px-3 py-2 text-sm transition focus:outline-none focus:ring-2 ${theme.classes.tableSearch}`}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder={`Search ${label.toLowerCase()}`}
+              type="search"
+              value={searchTerm}
+            />
+          </div>
+          <div className="max-h-56 overflow-y-auto p-1">
+            {filteredOptions.length === 0 ? (
+              <p className={`px-3 py-2 text-sm ${theme.classes.muted}`}>
+                No countries found.
+              </p>
+            ) : (
+              filteredOptions.map((option) => (
+                <button
+                  className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition ${
+                    String(option.value) === String(selectedValue)
+                      ? theme.classes.dashboardNavActive
+                      : `${theme.classes.bodyText} hover:bg-slate-50`
+                  }`}
+                  key={option.value}
+                  onClick={() => handleSelect(option.value)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
 function createFormRows(fieldEntries) {
   const pairGroups = [
+    ['partner', 'partnerType'],
+    ['contactPerson', 'contactPosition'],
+    ['contactEmail', 'contactPhone'],
+    ['dateSigned', 'effectiveDate'],
+    ['expiryDate', 'lastReviewDate'],
+    ['department', 'status'],
+    ['renewalRequired', 'progressStatus'],
     ['startDate', 'endDate'],
     ['days', 'hours'],
     ['female', 'male'],
@@ -328,11 +441,16 @@ function fieldConfig(key, selectOptions = {}) {
   const databaseOptions = selectOptions[key]
   const relationshipFields = [
     'category',
+    'collaborationArea',
     'department',
     'departments',
     'donor',
     'fundingType',
     'mode',
+    'partner',
+    'partnerType',
+    'progressStatus',
+    'renewalRequired',
     'sector',
   ]
   const options = {
@@ -346,6 +464,9 @@ function fieldConfig(key, selectOptions = {}) {
     'partners',
     'departments',
     'audience',
+    'deliverables',
+    'nextAction',
+    'objectives',
     'prerequisites',
     'certification',
     'accreditation',
@@ -370,6 +491,7 @@ function fieldConfig(key, selectOptions = {}) {
       : relationshipFields.includes(key)
         ? []
         : options[key],
+    searchableOptions: key === 'country' ? countryOptions : undefined,
   }
 }
 
@@ -457,6 +579,30 @@ function calculateDurationMonths(startDate, endDate) {
   const dayAdjustment = end.getDate() >= start.getDate() ? 1 : 0
 
   return Math.max(yearMonths + monthDifference + dayAdjustment, 1)
+}
+
+function calculateDurationLabel(startDate, endDate) {
+  const months = calculateDurationMonths(startDate, endDate)
+
+  if (!months) {
+    return ''
+  }
+
+  const years = Math.floor(months / 12)
+  const remainingMonths = months % 12
+  const parts = []
+
+  if (years > 0) {
+    parts.push(`${years} ${years === 1 ? 'Year' : 'Years'}`)
+  }
+
+  if (remainingMonths > 0) {
+    parts.push(
+      `${remainingMonths} ${remainingMonths === 1 ? 'Month' : 'Months'}`,
+    )
+  }
+
+  return parts.join(' ')
 }
 
 export default RegistryForm

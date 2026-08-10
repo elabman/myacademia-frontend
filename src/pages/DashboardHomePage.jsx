@@ -41,6 +41,12 @@ const quickActions = [
     to: '/dashboard/projects',
   },
   {
+    icon: FileText,
+    label: 'MoU Agreements',
+    supporting: 'Track partner agreements',
+    to: '/dashboard/mou-agreements',
+  },
+  {
     icon: LibraryBig,
     label: 'Short Courses',
     supporting: 'Open course offerings',

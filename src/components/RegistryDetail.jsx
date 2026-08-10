@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
-import { ArrowLeft, FileText } from 'lucide-react'
+import { ArrowLeft, FileText, Pencil, Trash2 } from 'lucide-react'
 import { theme } from '../theme'
 
 function RegistryDetail({
   backTo,
   columns,
+  editTo,
   errorMessage,
+  isDeleting = false,
   isLoading = false,
+  onDelete,
   record,
   title,
 }) {
@@ -27,13 +30,7 @@ function RegistryDetail({
             ? 'Please wait while the full details are loaded.'
             : errorMessage || 'The selected record could not be found.'}
         </p>
-        <Link
-          className={`mt-5 inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
-          to={backTo}
-        >
-          <ArrowLeft size={16} />
-          Back to table
-        </Link>
+        <DetailActions backTo={backTo} />
       </section>
     )
   }
@@ -54,13 +51,12 @@ function RegistryDetail({
             {primaryValue}
           </h2>
         </div>
-        <Link
-          className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
-          to={backTo}
-        >
-          <ArrowLeft size={16} />
-          Back to table
-        </Link>
+        <DetailActions
+          backTo={backTo}
+          editTo={editTo}
+          isDeleting={isDeleting}
+          onDelete={onDelete}
+        />
       </div>
 
       <section
@@ -106,6 +102,40 @@ function RegistryDetail({
         </div>
       </section>
     </section>
+  )
+}
+
+function DetailActions({ backTo, editTo, isDeleting, onDelete }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Link
+        className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
+        to={backTo}
+      >
+        <ArrowLeft size={16} />
+        Back to table
+      </Link>
+      {editTo && (
+        <Link
+          className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
+          to={editTo}
+        >
+          <Pencil size={16} />
+          Edit
+        </Link>
+      )}
+      {onDelete && (
+        <button
+          className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${theme.classes.dangerButton}`}
+          disabled={isDeleting}
+          onClick={onDelete}
+          type="button"
+        >
+          <Trash2 size={16} />
+          {isDeleting ? 'Deleting...' : 'Delete'}
+        </button>
+      )}
+    </div>
   )
 }
 
