@@ -79,9 +79,6 @@ function ProjectProfileDetail({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={project.status} />
-                <span className={`text-sm ${theme.classes.muted}`}>
-                  S/N {project.sn || '-'}
-                </span>
               </div>
 
               <h3 className={`mt-3 text-base font-bold ${theme.classes.heading}`}>

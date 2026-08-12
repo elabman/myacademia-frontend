@@ -32,22 +32,23 @@ function RegistryTable({
     quickColumns ?? columns.slice(0, 8).map(([key]) => key)
   const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns)
   const quickColumnEntries = columns.filter(([key]) => visibleColumns.includes(key))
+  const orderedRows = useMemo(() => sortByCreationOrder(rows), [rows])
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
     if (!normalizedSearch) {
-      return rows
+      return orderedRows
     }
 
-    return rows.filter((row) =>
+    return orderedRows.filter((row) =>
       columns.some(([key]) =>
         String(row[key] ?? '')
           .toLowerCase()
           .includes(normalizedSearch),
       ),
     )
-  }, [columns, rows, searchTerm])
+  }, [columns, orderedRows, searchTerm])
 
   return (
     <section>
@@ -126,12 +127,12 @@ function RegistryTable({
                 <th className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}>
                   Actions
                 </th>
-                {quickColumnEntries.map(([, label]) => (
+                {quickColumnEntries.map(([key, label]) => (
                   <th
                     className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}
                     key={label}
                   >
-                    {label}
+                    {displayColumnLabel(key, label)}
                   </th>
                 ))}
               </tr>
@@ -170,13 +171,14 @@ function RegistryTable({
                 </tr>
               )}
 
-              {!isLoading && !errorMessage && filteredRows.map((row) => (
+              {!isLoading && !errorMessage && filteredRows.map((row, index) => (
                 <TableRow
                   isDeleting={String(isDeletingId) === String(row.id ?? row.sn)}
                   key={row.id ?? row.sn}
                   onDeleteRow={onDeleteRow}
                   quickColumnEntries={quickColumnEntries}
                   row={row}
+                  rowNumber={index + 1}
                 />
               ))}
             </tbody>
@@ -230,7 +232,13 @@ function RegistryTable({
   )
 }
 
-function TableRow({ isDeleting, onDeleteRow, quickColumnEntries, row }) {
+function TableRow({
+  isDeleting,
+  onDeleteRow,
+  quickColumnEntries,
+  row,
+  rowNumber,
+}) {
   const rowId = row.id ?? row.sn
 
   return (
@@ -274,11 +282,54 @@ function TableRow({ isDeleting, onDeleteRow, quickColumnEntries, row }) {
           } ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
           key={key}
         >
-          {key === 'status' ? <StatusPill value={row[key]} /> : row[key]}
+          {key === 'sn' ? (
+            rowNumber
+          ) : key === 'status' ? (
+            <StatusPill value={row[key]} />
+          ) : (
+            row[key]
+          )}
         </td>
       ))}
     </tr>
   )
+}
+
+function displayColumnLabel(key, label) {
+  return key === 'sn' ? 'No' : label
+}
+
+function sortByCreationOrder(items) {
+  return [...items].sort((firstItem, secondItem) => {
+    const firstValue = creationOrderValue(firstItem)
+    const secondValue = creationOrderValue(secondItem)
+
+    if (firstValue === secondValue) {
+      return 0
+    }
+
+    return firstValue > secondValue ? 1 : -1
+  })
+}
+
+function creationOrderValue(item) {
+  const dateValue =
+    item.created_at ||
+    item.createdAt ||
+    item.created_date ||
+    item.createdDate ||
+    item.date_created
+
+  if (dateValue) {
+    const timestamp = new Date(dateValue).getTime()
+
+    if (!Number.isNaN(timestamp)) {
+      return timestamp
+    }
+  }
+
+  const numericId = Number(item.id ?? item.sn ?? Number.MAX_SAFE_INTEGER)
+  return Number.isNaN(numericId) ? Number.MAX_SAFE_INTEGER : numericId
 }
 
 function ColumnSelectorModal({

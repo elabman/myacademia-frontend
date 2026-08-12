@@ -1,7 +1,7 @@
 import {
   listCollaborationAreas,
   listDepartments,
-  listDonors,
+  listPartners,
   listPartnerTypes,
 } from '../services/registryService'
 import { staticOptions, toOptions } from './registryOptions'
@@ -9,7 +9,7 @@ import { staticOptions, toOptions } from './registryOptions'
 export async function loadMouSelectOptions(accessToken) {
   const [partners, partnerTypes, departments, collaborationAreas] =
     await Promise.all([
-      listDonors(accessToken).catch(() => []),
+      listPartners(accessToken).catch(() => []),
       listPartnerTypes(accessToken).catch(() => []),
       listDepartments(accessToken).catch(() => []),
       listCollaborationAreas(accessToken).catch(() => []),
@@ -43,8 +43,8 @@ export async function loadMouSelectOptions(accessToken) {
       'Completed',
     ]),
     renewalRequired: [
-      { label: 'Yes', value: '1' },
-      { label: 'No', value: '0' },
+      { label: 'Yes', value: 'true' },
+      { label: 'No', value: 'false' },
     ],
     status: staticOptions([
       'Active',

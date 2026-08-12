@@ -80,9 +80,6 @@ function ShortCourseProfileDetail({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={course.status} />
-                <span className={`text-sm ${theme.classes.muted}`}>
-                  S/N {course.sn || '-'}
-                </span>
               </div>
 
               <h3 className={`mt-3 text-base font-bold ${theme.classes.heading}`}>

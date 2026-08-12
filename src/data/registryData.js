@@ -79,7 +79,7 @@ export const projects = [
 ]
 
 export const projectColumns = [
-  ['sn', 'S/N'],
+  ['sn', 'No'],
   ['title', 'Project Title'],
   ['donor', 'Donor / Funding Agency'],
   ['partners', 'Partner Organisation(s)'],
@@ -245,7 +245,7 @@ export const shortCourses = [
 ]
 
 export const shortCourseColumns = [
-  ['sn', 'S/N'],
+  ['sn', 'No'],
   ['title', 'Course Title'],
   ['department', 'Department'],
   ['category', 'Category'],
@@ -269,7 +269,7 @@ export const shortCourseColumns = [
 ]
 
 export const mouAgreementColumns = [
-  ['sn', 'S/N'],
+  ['sn', 'No'],
   ['partner', 'Partner Organisation'],
   ['partnerType', 'Partner Type'],
   ['country', 'Country'],

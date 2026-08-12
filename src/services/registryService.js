@@ -305,6 +305,63 @@ export async function listDonors(accessToken) {
   return unwrapList(await apiRequest('/donors', { accessToken }))
 }
 
+export async function listPartners(accessToken) {
+  try {
+    return unwrapList(await apiRequest('/partners', { accessToken })).map(
+      normalizePartner,
+    )
+  } catch {
+    return (await listDonors(accessToken)).map(normalizePartner)
+  }
+}
+
+export async function createPartner(accessToken, data) {
+  try {
+    return unwrapData(
+      await apiRequest('/partners', {
+        accessToken,
+        body: data,
+        method: 'POST',
+      }),
+    )
+  } catch {
+    return createDonor(accessToken, { donor_name: data.partner_name })
+  }
+}
+
+export async function updatePartner(accessToken, partnerId, data) {
+  try {
+    return unwrapData(
+      await apiRequest(`/partners/${partnerId}`, {
+        accessToken,
+        body: data,
+        method: 'PUT',
+      }),
+    )
+  } catch {
+    return updateDonor(accessToken, partnerId, { donor_name: data.partner_name })
+  }
+}
+
+export async function deletePartner(accessToken, partnerId) {
+  try {
+    return await apiRequest(`/partners/${partnerId}`, {
+      accessToken,
+      method: 'DELETE',
+    })
+  } catch {
+    return deleteDonor(accessToken, partnerId)
+  }
+}
+
+function normalizePartner(partner) {
+  return {
+    ...partner,
+    id: value(partner, ['partner_id', 'id', 'donor_id']),
+    partner_name: value(partner, ['partner_name', 'donor_name', 'name']),
+  }
+}
+
 export async function createDonor(accessToken, data) {
   return unwrapData(
     await apiRequest('/donors', {
@@ -523,6 +580,7 @@ function normalizeProject(project) {
   return {
     id: value(project, ['id', 'project_id', 'sn']),
     sn: value(project, ['sn', 'serial_number', 'id', 'project_id']),
+    createdAt: optionalValue(project, ['createdAt', 'created_at', 'created_date']),
     title: value(project, ['title', 'project_title']),
     departmentId: optionalValue(project, ['department_id', 'target_department_id']),
     donorId: optionalValue(project, ['donor_id']),
@@ -555,6 +613,7 @@ function normalizeShortCourse(course) {
   return {
     id: value(course, ['id', 'short_course_id', 'sn']),
     sn: value(course, ['sn', 'serial_number', 'id', 'short_course_id']),
+    createdAt: optionalValue(course, ['createdAt', 'created_at', 'created_date']),
     title: value(course, ['title', 'course_title']),
     categoryId: optionalValue(course, ['category_id']),
     deliveryModeId: optionalValue(course, ['delivery_mode_id']),
@@ -583,8 +642,9 @@ function normalizeShortCourse(course) {
 
 function normalizeMouAgreement(mou) {
   return {
-    id: value(mou, ['id', 'mou_agreement_id']),
-    sn: value(mou, ['sn', 'serial_number', 'id', 'mou_agreement_id']),
+    id: value(mou, ['id', 'mou_id', 'mou_agreement_id', 'agreement_id']),
+    sn: value(mou, ['sn', 'serial_number', 'id', 'mou_id', 'mou_agreement_id']),
+    createdAt: optionalValue(mou, ['createdAt', 'created_at', 'created_date']),
     partner: value(mou, ['partner', 'partner_name', 'donor_name', 'partner_id']),
     partnerId: optionalValue(mou, ['partner_id']),
     partnerType: value(mou, ['partner_type', 'partner_type_name', 'type_name', 'partner_type_id']),
@@ -686,7 +746,7 @@ function toMouAgreementPayload(formData) {
     purpose_objectives: formData.objectives,
     responsible_department_id: numberOrValue(formData.department),
     status: formData.status,
-    renewal_required: numberOrValue(formData.renewalRequired),
+    renewal_required: formData.renewalRequired,
     last_review_date: formData.lastReviewDate,
     key_deliverables: formData.deliverables,
     progress_status: formData.progressStatus,

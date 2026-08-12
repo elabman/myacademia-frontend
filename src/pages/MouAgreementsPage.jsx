@@ -21,9 +21,9 @@ function MouAgreementsPage() {
     try {
       const result = await listMouAgreements(auth.accessToken, {
         limit: 100,
-        page: 1,
-        sort: 'expiry_date',
         order: 'asc',
+        page: 1,
+        sort: 'created_at',
       })
       setMouAgreements(result.rows)
     } catch (error) {

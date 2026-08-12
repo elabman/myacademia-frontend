@@ -101,9 +101,9 @@ function toMouInitialValues(mou, options) {
       mou.partnerTypeId || valueFromLabel(options.partnerType, mou.partnerType),
     renewalRequired:
       mou.renewalRequired === 'Yes'
-        ? '1'
+        ? 'true'
         : mou.renewalRequired === 'No'
-          ? '0'
+          ? 'false'
           : mou.renewalRequired,
   }
 }

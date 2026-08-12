@@ -10,6 +10,7 @@ function ApiListPage({ backTo, columns, emptyMessage, eyebrow, loadData, title }
   const [isLoading, setIsLoading] = useState(true)
   const [rows, setRows] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
+  const orderedRows = useMemo(() => sortByCreationOrder(rows), [rows])
 
   const fetchRows = useCallback(async () => {
     setErrorMessage('')
@@ -35,15 +36,15 @@ function ApiListPage({ backTo, columns, emptyMessage, eyebrow, loadData, title }
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
     if (!normalizedSearch) {
-      return rows
+      return orderedRows
     }
 
-    return rows.filter((row) =>
+    return orderedRows.filter((row) =>
       columns.some(({ key }) =>
         String(readValue(row, key)).toLowerCase().includes(normalizedSearch),
       ),
     )
-  }, [columns, rows, searchTerm])
+  }, [columns, orderedRows, searchTerm])
 
   return (
     <section className="space-y-4">
@@ -121,12 +122,17 @@ export function SimpleDataTable({
   isLoading = false,
   rows,
 }) {
+  const visibleColumns = columns.filter((column) => !isDatabaseIdColumn(column))
+
   return (
     <div className="overflow-x-auto px-4 pb-4">
       <table className="w-full min-w-[760px] text-left text-sm">
         <thead className={theme.classes.tableHeader}>
           <tr>
-            {columns.map(({ key, label }) => (
+            <th className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}>
+              No
+            </th>
+            {visibleColumns.map(({ key, label }) => (
               <th
                 className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}
                 key={key}
@@ -141,7 +147,7 @@ export function SimpleDataTable({
             <tr>
               <td
                 className={`border-b px-3 py-8 text-center ${theme.classes.tableRowDivider} ${theme.classes.muted}`}
-                colSpan={columns.length}
+                colSpan={visibleColumns.length + 1}
               >
                 Loading records...
               </td>
@@ -152,7 +158,7 @@ export function SimpleDataTable({
             <tr>
               <td
                 className={`border-b px-3 py-8 text-center ${theme.classes.tableRowDivider} ${theme.classes.errorText}`}
-                colSpan={columns.length}
+                colSpan={visibleColumns.length + 1}
               >
                 {errorMessage}
               </td>
@@ -163,7 +169,7 @@ export function SimpleDataTable({
             <tr>
               <td
                 className={`border-b px-3 py-8 text-center ${theme.classes.tableRowDivider} ${theme.classes.muted}`}
-                colSpan={columns.length}
+                colSpan={visibleColumns.length + 1}
               >
                 {emptyMessage}
               </td>
@@ -177,7 +183,12 @@ export function SimpleDataTable({
                 className={`align-top transition ${theme.classes.tableRowHover}`}
                 key={row.id ?? row.audit_log_id ?? row.user_id ?? index}
               >
-                {columns.map(({ key }) => (
+                <td
+                  className={`border-b px-3 py-3 ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
+                >
+                  {index + 1}
+                </td>
+                {visibleColumns.map(({ key }) => (
                   <td
                     className={`border-b px-3 py-3 ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
                     key={key}
@@ -191,6 +202,45 @@ export function SimpleDataTable({
       </table>
     </div>
   )
+}
+
+function isDatabaseIdColumn({ key, label }) {
+  return key === 'id' && label === 'ID'
+}
+
+function sortByCreationOrder(items) {
+  return [...items].sort((firstItem, secondItem) => {
+    const firstValue = creationOrderValue(firstItem)
+    const secondValue = creationOrderValue(secondItem)
+
+    if (firstValue === secondValue) {
+      return 0
+    }
+
+    return firstValue > secondValue ? 1 : -1
+  })
+}
+
+function creationOrderValue(item) {
+  const dateValue =
+    item.created_at ||
+    item.createdAt ||
+    item.created_date ||
+    item.createdDate ||
+    item.date_created
+
+  if (dateValue) {
+    const timestamp = new Date(dateValue).getTime()
+
+    if (!Number.isNaN(timestamp)) {
+      return timestamp
+    }
+  }
+
+  const numericId = Number(
+    item.id ?? item.audit_log_id ?? item.user_id ?? Number.MAX_SAFE_INTEGER,
+  )
+  return Number.isNaN(numericId) ? Number.MAX_SAFE_INTEGER : numericId
 }
 
 function readValue(row, key) {

@@ -35,10 +35,11 @@ function RegistryDetail({
     )
   }
 
-  const [primaryKey] = columns[1] ?? columns[0]
+  const displayColumns = columns.filter(([key]) => key !== 'sn')
+  const [primaryKey] = displayColumns[0] ?? columns[0]
   const primaryValue = record[primaryKey]
-  const summaryFields = columns.slice(0, 8)
-  const detailFields = columns.slice(8)
+  const summaryFields = displayColumns.slice(0, 8)
+  const detailFields = displayColumns.slice(8)
 
   return (
     <section className="space-y-4">

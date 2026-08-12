@@ -26,6 +26,7 @@ function MasterDataPage({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [records, setRecords] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
+  const orderedRecords = useMemo(() => sortByCreationOrder(records), [records])
 
   const loadRecords = useCallback(async () => {
     setErrorMessage('')
@@ -51,15 +52,16 @@ function MasterDataPage({
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
     if (!normalizedSearch) {
-      return records
+      return orderedRecords
     }
 
-    return records.filter((record) =>
+    return orderedRecords.filter((record) =>
       columns.some(({ key }) =>
         String(readValue(record, key)).toLowerCase().includes(normalizedSearch),
       ),
     )
-  }, [columns, records, searchTerm])
+  }, [columns, orderedRecords, searchTerm])
+  const visibleColumns = columns.filter((column) => !isDatabaseIdColumn(column))
 
   const openCreateForm = () => {
     setEditingRecord(null)
@@ -98,7 +100,7 @@ function MasterDataPage({
 
   const handleDelete = async (record) => {
     const id = recordId(record, idKeys)
-    const name = displayName(record, columns)
+    const name = displayName(record, visibleColumns)
 
     if (!window.confirm(`Delete "${name}"?`)) {
       return
@@ -193,7 +195,10 @@ function MasterDataPage({
                 <th className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}>
                   Actions
                 </th>
-                {columns.map(({ key, label }) => (
+                <th className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}>
+                  No
+                </th>
+                {visibleColumns.map(({ key, label }) => (
                   <th
                     className={`whitespace-nowrap px-3 py-3 text-xs font-semibold ${theme.classes.label}`}
                     key={key}
@@ -206,14 +211,14 @@ function MasterDataPage({
             <tbody>
               {isLoading && (
                 <TableMessage
-                  colSpan={columns.length + 1}
+                  colSpan={visibleColumns.length + 2}
                   message={`Loading ${title.toLowerCase()}...`}
                 />
               )}
 
               {!isLoading && filteredRecords.length === 0 && (
                 <TableMessage
-                  colSpan={columns.length + 1}
+                  colSpan={visibleColumns.length + 2}
                   message={emptyMessage}
                 />
               )}
@@ -248,7 +253,12 @@ function MasterDataPage({
                           </button>
                         </div>
                       </td>
-                      {columns.map(({ key }) => (
+                      <td
+                        className={`border-b px-3 py-3 ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
+                      >
+                        {index + 1}
+                      </td>
+                      {visibleColumns.map(({ key }) => (
                         <td
                           className={`border-b px-3 py-3 ${theme.classes.tableRowDivider} ${theme.classes.bodyText}`}
                           key={key}
@@ -458,6 +468,43 @@ function formatCell(value) {
 function displayName(record, columns) {
   const column = columns.find(({ key }) => key !== 'id')
   return readValue(record, column?.key || 'id') || 'record'
+}
+
+function isDatabaseIdColumn({ key, label }) {
+  return key === 'id' && label === 'ID'
+}
+
+function sortByCreationOrder(items) {
+  return [...items].sort((firstItem, secondItem) => {
+    const firstValue = creationOrderValue(firstItem)
+    const secondValue = creationOrderValue(secondItem)
+
+    if (firstValue === secondValue) {
+      return 0
+    }
+
+    return firstValue > secondValue ? 1 : -1
+  })
+}
+
+function creationOrderValue(item) {
+  const dateValue =
+    item.created_at ||
+    item.createdAt ||
+    item.created_date ||
+    item.createdDate ||
+    item.date_created
+
+  if (dateValue) {
+    const timestamp = new Date(dateValue).getTime()
+
+    if (!Number.isNaN(timestamp)) {
+      return timestamp
+    }
+  }
+
+  const numericId = Number(item.id ?? Number.MAX_SAFE_INTEGER)
+  return Number.isNaN(numericId) ? Number.MAX_SAFE_INTEGER : numericId
 }
 
 function singularTitle(title) {
