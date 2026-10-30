@@ -3,14 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import RegistryForm from '../components/RegistryForm'
 import { shortCourseColumns } from '../data/registryData'
 import { useAuth } from '../hooks/useAuth'
-import {
-  getShortCourse,
-  listDepartments,
-  listShortCourseRecords,
-  updateShortCourse,
-} from '../services/registryService'
+import { getShortCourse, updateShortCourse } from '../services/registryService'
 import { theme } from '../theme'
-import { toOptions } from '../utils/registryOptions'
+import { loadShortCourseSelectOptions } from '../utils/registrySelectOptions'
 
 function ShortCourseEditPage() {
   const { auth } = useAuth()
@@ -27,31 +22,10 @@ function ShortCourseEditPage() {
     setIsLoading(true)
 
     try {
-      const [course, departments, shortCourseRecords] = await Promise.all([
+      const [course, options] = await Promise.all([
         getShortCourse(auth.accessToken, courseId),
-        listDepartments(auth.accessToken).catch(() => []),
-        listShortCourseRecords(auth.accessToken, { limit: 1000, page: 1 }).catch(
-          () => [],
-        ),
+        loadShortCourseSelectOptions(auth.accessToken),
       ])
-
-      const options = {
-        category: toOptions(
-          shortCourseRecords,
-          ['category_name', 'category'],
-          ['category_id'],
-        ),
-        department: toOptions(
-          departments,
-          ['department_name', 'name'],
-          ['department_id', 'id', 'value'],
-        ),
-        mode: toOptions(
-          shortCourseRecords,
-          ['delivery_mode_name', 'delivery_mode', 'mode'],
-          ['delivery_mode_id'],
-        ),
-      }
 
       setInitialValues(toShortCourseInitialValues(course, options))
       setSelectOptions(options)
@@ -120,6 +94,14 @@ function toShortCourseInitialValues(course, options) {
     category: course.categoryId || valueFromLabel(options.category, course.category),
     department: course.departmentId || valueFromLabel(options.department, course.department),
     mode: course.deliveryModeId || valueFromLabel(options.mode, course.mode),
+    coordinator:
+      course.coordinatorId || valueFromLabel(options.coordinator, course.coordinator),
+    certification:
+      course.certificationId ||
+      valueFromLabel(options.certification, course.certification),
+    accreditation:
+      course.accreditationBodyId ||
+      valueFromLabel(options.accreditation, course.accreditation),
     certified: numericValue(course.certified),
     days: numericValue(course.days),
     fee: numericValue(course.fee),

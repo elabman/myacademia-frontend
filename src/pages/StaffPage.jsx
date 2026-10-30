@@ -1,7 +1,10 @@
+import { useEffect, useMemo, useState } from 'react'
 import MasterDataPage from '../components/MasterDataPage'
+import { useAuth } from '../hooks/useAuth'
 import {
   createStaff,
   deleteStaff,
+  listDepartments,
   listStaff,
   updateStaff,
 } from '../services/registryService'
@@ -13,14 +16,40 @@ const columns = [
   { key: 'department_name', label: 'Department' },
 ]
 
-const fields = [
-  { name: 'full_name', label: 'Full Name', required: true },
-  { name: 'email', label: 'Email', type: 'email' },
-  { name: 'phone', label: 'Phone' },
-  { name: 'department_id', label: 'Department ID', type: 'number' },
-]
-
 function StaffPage() {
+  const { auth } = useAuth()
+  const [departments, setDepartments] = useState([])
+
+  useEffect(() => {
+    let isActive = true
+
+    listDepartments(auth.accessToken)
+      .then((rows) => isActive && setDepartments(rows))
+      .catch(() => isActive && setDepartments([]))
+
+    return () => {
+      isActive = false
+    }
+  }, [auth.accessToken])
+
+  const fields = useMemo(
+    () => [
+      { name: 'full_name', label: 'Full Name', required: true },
+      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'phone', label: 'Phone' },
+      {
+        name: 'department_id',
+        label: 'Department',
+        options: departments.map((department) => ({
+          label: department.department_name,
+          value: department.department_id ?? department.id,
+        })),
+        type: 'select',
+      },
+    ],
+    [departments],
+  )
+
   return (
     <MasterDataPage
       backTo="/dashboard/admin"

@@ -3,14 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import RegistryForm from '../components/RegistryForm'
 import { projectColumns } from '../data/registryData'
 import { useAuth } from '../hooks/useAuth'
-import {
-  createProject,
-  listDepartments,
-  listDonors,
-  listProjectRecords,
-  listSectors,
-} from '../services/registryService'
-import { staticOptions, toOptions } from '../utils/registryOptions'
+import { createProject } from '../services/registryService'
+import { loadProjectSelectOptions } from '../utils/registrySelectOptions'
 
 function ProjectFormPage() {
   const { auth } = useAuth()
@@ -20,44 +14,7 @@ function ProjectFormPage() {
   const [selectOptions, setSelectOptions] = useState({})
 
   const loadSelectOptions = useCallback(async () => {
-    const [donors, sectors, departments, projectRecords] = await Promise.all([
-      listDonors(auth.accessToken).catch(() => []),
-      listSectors(auth.accessToken).catch(() => []),
-      listDepartments(auth.accessToken).catch(() => []),
-      listProjectRecords(auth.accessToken, { limit: 1000, page: 1 }).catch(
-        () => [],
-      ),
-    ])
-
-    setSelectOptions({
-      departments: toOptions(
-        departments,
-        ['department_name', 'name'],
-        ['department_id', 'id', 'value'],
-      ),
-      donor: toOptions(
-        donors,
-        ['donor_name', 'name', 'funding_agency'],
-        ['donor_id', 'id', 'value'],
-      ),
-      fundingType: toOptions(
-        projectRecords,
-        ['funding_type_name', 'funding_type', 'fundingType'],
-        ['funding_type_id'],
-      ),
-      sector: toOptions(
-        sectors,
-        ['sector_name', 'name'],
-        ['sector_id', 'id', 'value'],
-      ),
-      status: staticOptions([
-        'Pipeline',
-        'Active',
-        'Completed',
-        'Suspended',
-        'Cancelled',
-      ]),
-    })
+    setSelectOptions(await loadProjectSelectOptions(auth.accessToken))
   }, [auth.accessToken])
 
   useEffect(() => {

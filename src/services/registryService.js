@@ -270,10 +270,39 @@ export async function unlinkMouCollaborationArea(
   )
 }
 
+// Dropdowns need every option, and the API returns only 20 rows unless asked.
+function listLookup(accessToken, path) {
+  return apiRequest(`${path}${createQueryString({ limit: 100 })}`, {
+    accessToken,
+  }).then(unwrapList)
+}
+
+export async function listFundingTypes(accessToken) {
+  return listLookup(accessToken, '/funding-types')
+}
+
+export async function listBeneficiaryTypes(accessToken) {
+  return listLookup(accessToken, '/beneficiary-types')
+}
+
+export async function listCourseCategories(accessToken) {
+  return listLookup(accessToken, '/course-categories')
+}
+
+export async function listDeliveryModes(accessToken) {
+  return listLookup(accessToken, '/delivery-modes')
+}
+
+export async function listCertificationTypes(accessToken) {
+  return listLookup(accessToken, '/certification-types')
+}
+
+export async function listAccreditationBodies(accessToken) {
+  return listLookup(accessToken, '/accreditation-bodies')
+}
+
 export async function listDepartments(accessToken) {
-  return unwrapList(
-    await apiRequest(`/departments${createQueryString({ limit: 100 })}`, { accessToken }),
-  )
+  return listLookup(accessToken, '/departments')
 }
 
 export async function createDepartment(accessToken, data) {
@@ -304,14 +333,12 @@ export async function deleteDepartment(accessToken, departmentId) {
 }
 
 export async function listDonors(accessToken) {
-  return unwrapList(await apiRequest('/donors', { accessToken }))
+  return listLookup(accessToken, '/donors')
 }
 
 export async function listPartners(accessToken) {
   try {
-    return unwrapList(await apiRequest('/partners', { accessToken })).map(
-      normalizePartner,
-    )
+    return (await listLookup(accessToken, '/partners')).map(normalizePartner)
   } catch {
     return (await listDonors(accessToken)).map(normalizePartner)
   }
@@ -392,7 +419,7 @@ export async function deleteDonor(accessToken, donorId) {
 }
 
 export async function listSectors(accessToken) {
-  return unwrapList(await apiRequest('/sectors', { accessToken }))
+  return listLookup(accessToken, '/sectors')
 }
 
 export async function createSector(accessToken, data) {
@@ -423,15 +450,15 @@ export async function deleteSector(accessToken, sectorId) {
 }
 
 export async function listAcademicYears(accessToken) {
-  return unwrapList(await apiRequest('/academic-years', { accessToken }))
+  return listLookup(accessToken, '/academic-years')
 }
 
 export async function listPartnerTypes(accessToken) {
-  return unwrapList(await apiRequest('/partner-types', { accessToken }))
+  return listLookup(accessToken, '/partner-types')
 }
 
 export async function listCollaborationAreas(accessToken) {
-  return unwrapList(await apiRequest('/collaboration-areas', { accessToken }))
+  return listLookup(accessToken, '/collaboration-areas')
 }
 
 export async function createAcademicYear(accessToken, data) {
@@ -499,13 +526,11 @@ export async function deleteUser(accessToken, userId) {
 }
 
 export async function listRoles(accessToken) {
-  return unwrapList(await apiRequest('/roles', { accessToken }))
+  return listLookup(accessToken, '/roles')
 }
 
 export async function listStaff(accessToken) {
-  return unwrapList(
-    await apiRequest(`/staff${createQueryString({ limit: 100 })}`, { accessToken }),
-  )
+  return listLookup(accessToken, '/staff')
 }
 
 export async function createStaff(accessToken, data) {
@@ -588,6 +613,8 @@ function normalizeProject(project) {
     title: value(project, ['title', 'project_title']),
     departmentId: optionalValue(project, ['department_id', 'target_department_id']),
     donorId: optionalValue(project, ['donor_id']),
+    coordinatorId: optionalValue(project, ['project_coordinator_id']),
+    beneficiaryTypeId: optionalValue(project, ['beneficiary_type_id']),
     fundingTypeId: optionalValue(project, ['funding_type_id']),
     sectorId: optionalValue(project, ['sector_id']),
     donor: value(project, ['donor', 'donor_name', 'funding_agency', 'donor_id']),
@@ -620,6 +647,9 @@ function normalizeShortCourse(course) {
     createdAt: optionalValue(course, ['createdAt', 'created_at', 'created_date']),
     title: value(course, ['title', 'course_title']),
     categoryId: optionalValue(course, ['category_id']),
+    coordinatorId: optionalValue(course, ['coordinator_id']),
+    certificationId: optionalValue(course, ['certification_id']),
+    accreditationBodyId: optionalValue(course, ['accreditation_body_id']),
     deliveryModeId: optionalValue(course, ['delivery_mode_id']),
     departmentId: optionalValue(course, ['department_id']),
     department: value(course, ['department', 'department_name', 'department_id']),
@@ -632,7 +662,7 @@ function normalizeShortCourse(course) {
     audience: value(course, ['audience', 'target_audience']),
     prerequisites: value(course, ['prerequisites']),
     coordinator: value(course, ['coordinator', 'course_coordinator', 'coordinator_name']),
-    certification: value(course, ['certification', 'certification_awarded']),
+    certification: value(course, ['certification', 'certification_name', 'certification_awarded']),
     accreditation: value(course, ['accreditation', 'accreditation_body']),
     female: value(course, ['female', 'participants_female']),
     male: value(course, ['male', 'participants_male']),
@@ -691,7 +721,7 @@ function toProjectPayload(formData) {
     donor_id: numberOrValue(formData.donor),
     funding_type_id: numberOrValue(formData.fundingType),
     sector_id: numberOrValue(formData.sector),
-    project_coordinator: formData.coordinator,
+    project_coordinator_id: numberOrValue(formData.coordinator),
     start_date: formData.startDate,
     end_date: formData.endDate,
     duration_months: numberOrValue(formData.duration),
@@ -700,7 +730,7 @@ function toProjectPayload(formData) {
     college_rp_contribution_rwf: numberOrValue(formData.collegeContribution),
     donor_contribution_usd: numberOrValue(formData.donorContribution),
     geographic_scope: formData.scope,
-    beneficiary_type: formData.beneficiaryType,
+    beneficiary_type_id: numberOrValue(formData.beneficiaryType),
     direct_beneficiaries: numberOrValue(formData.beneficiaries),
     key_performance_indicator: formData.kpi,
     achievement_rate_pct: numberOrValue(formData.achievement),
@@ -721,9 +751,9 @@ function toShortCoursePayload(formData) {
     language: formData.language,
     target_audience: formData.audience,
     prerequisites: formData.prerequisites,
-    course_coordinator: formData.coordinator,
-    certification_awarded: formData.certification,
-    accreditation_body: formData.accreditation,
+    coordinator_id: numberOrValue(formData.coordinator),
+    certification_id: numberOrValue(formData.certification),
+    accreditation_body_id: numberOrValue(formData.accreditation),
     participants_female: numberOrValue(formData.female),
     participants_male: numberOrValue(formData.male),
     total_participants: numberOrValue(formData.total),

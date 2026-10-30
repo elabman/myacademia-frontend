@@ -3,12 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import RegistryForm from '../components/RegistryForm'
 import { shortCourseColumns } from '../data/registryData'
 import { useAuth } from '../hooks/useAuth'
-import {
-  createShortCourse,
-  listDepartments,
-  listShortCourseRecords,
-} from '../services/registryService'
-import { toOptions } from '../utils/registryOptions'
+import { createShortCourse } from '../services/registryService'
+import { loadShortCourseSelectOptions } from '../utils/registrySelectOptions'
 
 function ShortCourseFormPage() {
   const { auth } = useAuth()
@@ -18,30 +14,7 @@ function ShortCourseFormPage() {
   const [selectOptions, setSelectOptions] = useState({})
 
   const loadSelectOptions = useCallback(async () => {
-    const [departments, shortCourseRecords] = await Promise.all([
-      listDepartments(auth.accessToken).catch(() => []),
-      listShortCourseRecords(auth.accessToken, { limit: 1000, page: 1 }).catch(
-        () => [],
-      ),
-    ])
-
-    setSelectOptions({
-      category: toOptions(
-        shortCourseRecords,
-        ['category_name', 'category'],
-        ['category_id'],
-      ),
-      department: toOptions(
-        departments,
-        ['department_name', 'name'],
-        ['department_id', 'id', 'value'],
-      ),
-      mode: toOptions(
-        shortCourseRecords,
-        ['delivery_mode_name', 'delivery_mode', 'mode'],
-        ['delivery_mode_id'],
-      ),
-    })
+    setSelectOptions(await loadShortCourseSelectOptions(auth.accessToken))
   }, [auth.accessToken])
 
   useEffect(() => {

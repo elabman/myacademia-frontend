@@ -422,9 +422,15 @@ function createFormRows(fieldEntries) {
       return
     }
 
-    const pair = pairGroups.find((group) => group[0] === key || group[1] === key)
+    // A field belongs to one row only; without the usedKeys check "department"
+    // was rendered twice on the short-course form and the empty copy won.
+    const pair = pairGroups.find(
+      (group) =>
+        group.includes(key) &&
+        group.every((pairKey) => fieldsByKey.has(pairKey) && !usedKeys.has(pairKey)),
+    )
 
-    if (pair?.every((pairKey) => fieldsByKey.has(pairKey))) {
+    if (pair) {
       rows.push(pair.map((pairKey) => [pairKey, fieldsByKey.get(pairKey)]))
       pair.forEach((pairKey) => usedKeys.add(pairKey))
       return
@@ -440,8 +446,12 @@ function createFormRows(fieldEntries) {
 function fieldConfig(key, selectOptions = {}) {
   const databaseOptions = selectOptions[key]
   const relationshipFields = [
+    'accreditation',
+    'beneficiaryType',
     'category',
+    'certification',
     'collaborationArea',
+    'coordinator',
     'department',
     'departments',
     'donor',
@@ -476,10 +486,7 @@ function fieldConfig(key, selectOptions = {}) {
 
   const hints = {
     achievement: 'Enter a number only. Example: 64',
-    category: 'Select appears when category IDs are returned by the short-course list.',
     duration: 'Calculated from start date and end date.',
-    fundingType: 'Select appears when funding type IDs are returned by the project list.',
-    mode: 'Select appears when delivery mode IDs are returned by the short-course list.',
     total: 'Calculated from female and male participants.',
   }
 

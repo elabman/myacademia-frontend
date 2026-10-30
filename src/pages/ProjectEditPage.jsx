@@ -3,16 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import RegistryForm from '../components/RegistryForm'
 import { projectColumns } from '../data/registryData'
 import { useAuth } from '../hooks/useAuth'
-import {
-  getProject,
-  listDepartments,
-  listDonors,
-  listProjectRecords,
-  listSectors,
-  updateProject,
-} from '../services/registryService'
+import { getProject, updateProject } from '../services/registryService'
 import { theme } from '../theme'
-import { staticOptions, toOptions } from '../utils/registryOptions'
+import { loadProjectSelectOptions } from '../utils/registrySelectOptions'
 
 function ProjectEditPage() {
   const { auth } = useAuth()
@@ -29,46 +22,10 @@ function ProjectEditPage() {
     setIsLoading(true)
 
     try {
-      const [project, donors, sectors, departments, projectRecords] =
-        await Promise.all([
-          getProject(auth.accessToken, projectId),
-          listDonors(auth.accessToken).catch(() => []),
-          listSectors(auth.accessToken).catch(() => []),
-          listDepartments(auth.accessToken).catch(() => []),
-          listProjectRecords(auth.accessToken, { limit: 1000, page: 1 }).catch(
-            () => [],
-          ),
-        ])
-
-      const options = {
-        departments: toOptions(
-          departments,
-          ['department_name', 'name'],
-          ['department_id', 'id', 'value'],
-        ),
-        donor: toOptions(
-          donors,
-          ['donor_name', 'name', 'funding_agency'],
-          ['donor_id', 'id', 'value'],
-        ),
-        fundingType: toOptions(
-          projectRecords,
-          ['funding_type_name', 'funding_type', 'fundingType'],
-          ['funding_type_id'],
-        ),
-        sector: toOptions(
-          sectors,
-          ['sector_name', 'name'],
-          ['sector_id', 'id', 'value'],
-        ),
-        status: staticOptions([
-          'Pipeline',
-          'Active',
-          'Completed',
-          'Suspended',
-          'Cancelled',
-        ]),
-      }
+      const [project, options] = await Promise.all([
+        getProject(auth.accessToken, projectId),
+        loadProjectSelectOptions(auth.accessToken),
+      ])
 
       setInitialValues(toProjectInitialValues(project, options))
       setSelectOptions(options)
@@ -136,6 +93,11 @@ function toProjectInitialValues(project, options) {
     fundingType:
       project.fundingTypeId || valueFromLabel(options.fundingType, project.fundingType),
     sector: project.sectorId || valueFromLabel(options.sector, project.sector),
+    coordinator:
+      project.coordinatorId || valueFromLabel(options.coordinator, project.coordinator),
+    beneficiaryType:
+      project.beneficiaryTypeId ||
+      valueFromLabel(options.beneficiaryType, project.beneficiaryType),
     departments:
       project.departmentId || valueFromLabel(options.departments, project.departments),
     achievement: numericValue(project.achievement),
