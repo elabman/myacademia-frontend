@@ -22,7 +22,9 @@ export async function apiRequest(path, options = {}) {
   const payload = await parseJson(response)
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload))
+    throw Object.assign(new Error(getErrorMessage(payload)), {
+      status: response.status,
+    })
   }
 
   return payload

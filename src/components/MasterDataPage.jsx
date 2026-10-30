@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { theme } from '../theme'
+import { detectDateKeys, useTableFilters } from '../utils/tableTools'
+import TableFilterBar from './TableFilterBar'
 
 function MasterDataPage({
   backTo,
@@ -26,7 +28,12 @@ function MasterDataPage({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [records, setRecords] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const orderedRecords = useMemo(() => sortByCreationOrder(records), [records])
+  const dateKeys = useMemo(() => detectDateKeys(columns, records), [columns, records])
+  const filters = useTableFilters(records, { dateKeys })
+  const orderedRecords = useMemo(
+    () => sortByCreationOrder(filters.filteredRows),
+    [filters.filteredRows],
+  )
 
   const loadRecords = useCallback(async () => {
     setErrorMessage('')
@@ -188,6 +195,18 @@ function MasterDataPage({
           </button>
         </div>
 
+        <TableFilterBar
+          exportConfig={{
+            columns: visibleColumns.map(({ key, label }) => ({
+              get: (row) => readValue(row, key),
+              label,
+            })),
+            rows: filteredRecords,
+            title,
+          }}
+          filters={filters}
+        />
+
         <div className="overflow-x-auto px-4 pb-4">
           <table className="w-full min-w-[820px] text-left text-sm">
             <thead className={theme.classes.tableHeader}>
@@ -309,7 +328,16 @@ function MasterDataFormModal({
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    onSubmit(Object.fromEntries(new FormData(event.currentTarget).entries()))
+    const formData = new FormData(event.currentTarget)
+    const values = Object.fromEntries(formData.entries())
+
+    fields
+      .filter((field) => field.type === 'multiselect')
+      .forEach((field) => {
+        values[field.name] = formData.getAll(field.name)
+      })
+
+    onSubmit(values)
   }
 
   return (
@@ -342,7 +370,38 @@ function MasterDataFormModal({
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-3 p-5 sm:grid-cols-2">
-            {fields.map((field) => (
+            {fields.map((field) =>
+              field.type === 'multiselect' ? (
+                <fieldset className="grid gap-1.5 sm:col-span-2" key={field.name}>
+                  <legend className={`text-xs font-semibold ${theme.classes.subtle}`}>
+                    {field.label}
+                  </legend>
+                  <div className="grid max-h-48 gap-2 overflow-y-auto sm:grid-cols-2">
+                    {field.options.length === 0 && (
+                      <p className={`text-sm ${theme.classes.muted}`}>
+                        No options available.
+                      </p>
+                    )}
+                    {field.options.map((option) => (
+                      <label
+                        className={`flex items-center gap-2 text-sm ${theme.classes.bodyText}`}
+                        key={String(option.value)}
+                      >
+                        <input
+                          className={`rounded ${theme.classes.checkbox}`}
+                          defaultChecked={(readValue(record, field.name) ?? []).some(
+                            (selected) => String(selected) === String(option.value),
+                          )}
+                          name={field.name}
+                          type="checkbox"
+                          value={String(option.value)}
+                        />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              ) : (
               <label className="grid gap-1.5" key={field.name}>
                 <span className={`text-xs font-semibold ${theme.classes.subtle}`}>
                   {field.label}
@@ -371,7 +430,8 @@ function MasterDataFormModal({
                   />
                 )}
               </label>
-            ))}
+              ),
+            )}
           </div>
 
           <div
@@ -418,7 +478,9 @@ function normalizePayload(values, fields) {
         field.name,
         field.type === 'number'
           ? numberOrValue(values[field.name])
-          : booleanOrValue(values[field.name]),
+          : field.type === 'multiselect'
+            ? (values[field.name] ?? []).map(Number)
+            : booleanOrValue(values[field.name]),
       ])
       .filter(([, value]) => value !== undefined && value !== ''),
   )

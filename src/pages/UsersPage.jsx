@@ -19,6 +19,8 @@ import {
   updateUser,
 } from '../services/registryService'
 import { theme } from '../theme'
+import { detectDateKeys, useTableFilters } from '../utils/tableTools'
+import TableFilterBar from '../components/TableFilterBar'
 import { staticOptions, toOptions } from '../utils/registryOptions'
 
 const columns = [
@@ -90,19 +92,23 @@ function UsersPage() {
     return () => window.clearTimeout(timeoutId)
   }, [loadUsers])
 
+  const dateKeys = useMemo(() => detectDateKeys(columns, users), [users])
+  const filters = useTableFilters(users, { dateKeys })
+
   const filteredUsers = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
+    const dateFilteredUsers = filters.filteredRows
 
     if (!normalizedSearch) {
-      return users
+      return dateFilteredUsers
     }
 
-    return users.filter((user) =>
+    return dateFilteredUsers.filter((user) =>
       columns.some(({ key }) =>
         String(readValue(user, key)).toLowerCase().includes(normalizedSearch),
       ),
     )
-  }, [users, searchTerm])
+  }, [filters.filteredRows, searchTerm])
 
   const openCreateForm = () => {
     setEditingUser(null)
@@ -221,6 +227,18 @@ function UsersPage() {
             Refresh
           </button>
         </div>
+
+        <TableFilterBar
+          exportConfig={{
+            columns: columns.map(({ key, label }) => ({
+              get: (row) => readValue(row, key),
+              label,
+            })),
+            rows: filteredUsers,
+            title: 'Users',
+          }}
+          filters={filters}
+        />
 
         <div className="overflow-x-auto px-4 pb-4">
           <table className="w-full min-w-[980px] text-left text-sm">

@@ -3,14 +3,37 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { theme } from '../theme'
+import { detectDateKeys, readPath, useTableFilters } from '../utils/tableTools'
+import TableFilterBar from './TableFilterBar'
 
-function ApiListPage({ backTo, columns, emptyMessage, eyebrow, loadData, title }) {
+function ApiListPage({
+  backTo,
+  columns,
+  emptyMessage,
+  eyebrow,
+  filterKeys = [],
+  loadData,
+  title,
+}) {
   const { auth } = useAuth()
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [rows, setRows] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const orderedRows = useMemo(() => sortByCreationOrder(rows), [rows])
+  const dateKeys = useMemo(() => detectDateKeys(columns, rows), [columns, rows])
+  const selectFilters = useMemo(
+    () =>
+      filterKeys.map((key) => ({
+        key,
+        label: columns.find((column) => column.key === key)?.label ?? key,
+      })),
+    [columns, filterKeys],
+  )
+  const filters = useTableFilters(rows, { dateKeys, selectFilters })
+  const orderedRows = useMemo(
+    () => sortByCreationOrder(filters.filteredRows),
+    [filters.filteredRows],
+  )
 
   const fetchRows = useCallback(async () => {
     setErrorMessage('')
@@ -96,6 +119,17 @@ function ApiListPage({ backTo, columns, emptyMessage, eyebrow, loadData, title }
             />
           </div>
         </div>
+
+        <TableFilterBar
+          exportConfig={{
+            columns: columns
+              .filter((column) => !isDatabaseIdColumn(column))
+              .map(({ key, label }) => ({ get: (row) => readPath(row, key), label })),
+            rows: filteredRows,
+            title,
+          }}
+          filters={filters}
+        />
 
         <SimpleDataTable
           columns={columns}

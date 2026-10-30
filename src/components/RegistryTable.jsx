@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import {
-  Download,
   Eye,
   Pencil,
   Plus,
@@ -11,6 +10,8 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { theme } from '../theme'
+import { detectDateKeys, useTableFilters } from '../utils/tableTools'
+import TableFilterBar from './TableFilterBar'
 
 function RegistryTable({
   addTo,
@@ -32,7 +33,19 @@ function RegistryTable({
     quickColumns ?? columns.slice(0, 8).map(([key]) => key)
   const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns)
   const quickColumnEntries = columns.filter(([key]) => visibleColumns.includes(key))
-  const orderedRows = useMemo(() => sortByCreationOrder(rows), [rows])
+  const dateKeys = useMemo(
+    () =>
+      detectDateKeys(
+        columns.map(([key, label]) => ({ key, label })),
+        rows,
+      ),
+    [columns, rows],
+  )
+  const filters = useTableFilters(rows, { dateKeys })
+  const orderedRows = useMemo(
+    () => sortByCreationOrder(filters.filteredRows),
+    [filters.filteredRows],
+  )
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
@@ -97,20 +110,6 @@ function RegistryTable({
             )}
             <button
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
-              type="button"
-            >
-              <Download size={16} />
-              Export this page
-            </button>
-            <button
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
-              type="button"
-            >
-              <Download size={16} />
-              Export all pages
-            </button>
-            <button
-              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${theme.classes.tableToolbarButton}`}
               onClick={() => setIsColumnModalOpen(true)}
               type="button"
             >
@@ -119,6 +118,18 @@ function RegistryTable({
             </button>
           </div>
         </div>
+
+        <TableFilterBar
+          exportConfig={{
+            columns: quickColumnEntries.map(([key, label]) => ({
+              get: (row, index) => (key === 'sn' ? index + 1 : row[key]),
+              label: displayColumnLabel(key, label),
+            })),
+            rows: filteredRows,
+            title,
+          }}
+          filters={filters}
+        />
 
         <div className="overflow-x-auto px-4 pb-4">
           <table className="w-full min-w-[1100px] text-left text-sm">

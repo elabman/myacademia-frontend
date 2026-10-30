@@ -1,8 +1,11 @@
 import {
   Building2,
   Calendar,
+  ClipboardList,
   History,
   Layers,
+  MessageSquareText,
+  QrCode,
   UploadCloud,
   UserRound,
   UsersRound,
@@ -22,6 +25,24 @@ const adminItems = [
     icon: UserRound,
     label: 'Staff',
     to: '/dashboard/admin/staff',
+  },
+  {
+    description: 'Generate and print Data Matrix review codes.',
+    icon: QrCode,
+    label: 'Review Codes',
+    to: '/dashboard/admin/staff-codes',
+  },
+  {
+    description: 'Manage services visitors can review.',
+    icon: ClipboardList,
+    label: 'Services',
+    to: '/dashboard/admin/services',
+  },
+  {
+    description: 'See feedback submitted by the public.',
+    icon: MessageSquareText,
+    label: 'Reviews',
+    to: '/dashboard/admin/reviews',
   },
   {
     description: 'Organise academic departments and codes.',

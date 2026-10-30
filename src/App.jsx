@@ -29,6 +29,10 @@ import ShortCourseFormPage from './pages/ShortCourseFormPage'
 import ShortCoursesPage from './pages/ShortCoursesPage'
 import SectorsPage from './pages/SectorsPage'
 import StaffPage from './pages/StaffPage'
+import StaffCodesPage from './pages/StaffCodesPage'
+import PublicReviewPage from './pages/PublicReviewPage'
+import ReviewsPage from './pages/ReviewsPage'
+import ServicesPage from './pages/ServicesPage'
 import UploadsPage from './pages/UploadsPage'
 import UsersPage from './pages/UsersPage'
 import { AuthProvider } from './contexts/AuthContext'
@@ -92,6 +96,7 @@ function App() {
               )
             }
           />
+          <Route path="/review/:staffId" element={<PublicReviewPage />} />
           <Route
             path="/dashboard"
             element={
@@ -144,6 +149,9 @@ function App() {
             <Route path="admin/sectors" element={<SectorsPage />} />
             <Route path="admin/academic-years" element={<AcademicYearsPage />} />
             <Route path="admin/staff" element={<StaffPage />} />
+            <Route path="admin/staff-codes" element={<StaffCodesPage />} />
+            <Route path="admin/services" element={<ServicesPage />} />
+            <Route path="admin/reviews" element={<ReviewsPage />} />
             <Route path="admin/approvals" element={<ApprovalsPage />} />
             <Route path="admin/audit-log" element={<AuditLogPage />} />
             <Route path="admin/uploads" element={<UploadsPage />} />
