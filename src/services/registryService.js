@@ -271,7 +271,9 @@ export async function unlinkMouCollaborationArea(
 }
 
 export async function listDepartments(accessToken) {
-  return unwrapList(await apiRequest('/departments', { accessToken }))
+  return unwrapList(
+    await apiRequest(`/departments${createQueryString({ limit: 100 })}`, { accessToken }),
+  )
 }
 
 export async function createDepartment(accessToken, data) {
@@ -501,7 +503,9 @@ export async function listRoles(accessToken) {
 }
 
 export async function listStaff(accessToken) {
-  return unwrapList(await apiRequest('/staff', { accessToken }))
+  return unwrapList(
+    await apiRequest(`/staff${createQueryString({ limit: 100 })}`, { accessToken }),
+  )
 }
 
 export async function createStaff(accessToken, data) {
