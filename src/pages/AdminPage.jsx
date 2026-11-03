@@ -27,7 +27,7 @@ const adminItems = [
     to: '/dashboard/admin/staff',
   },
   {
-    description: 'Generate and print Data Matrix review codes.',
+    description: 'Generate and print QR review codes.',
     icon: QrCode,
     label: 'Review Codes',
     to: '/dashboard/admin/staff-codes',

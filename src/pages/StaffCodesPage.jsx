@@ -2,12 +2,12 @@ import bwipjs from 'bwip-js'
 import { ArrowLeft, Download, Printer, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import DataMatrixCode from '../components/DataMatrixCode'
+import ReviewCode from '../components/ReviewCode'
 import ReviewCodePrintSheet from '../components/ReviewCodePrintSheet'
 import { useAuth } from '../hooks/useAuth'
 import { listStaff } from '../services/registryService'
 import { mockStaff, shouldUseMock } from '../services/reviewMock'
-import { getReviewUrl } from '../utils/reviewOptions'
+import { getReviewUrl, REVIEW_CODE_TYPE } from '../utils/reviewOptions'
 import { theme } from '../theme'
 
 function StaffCodesPage() {
@@ -74,11 +74,12 @@ function StaffCodesPage() {
     const canvas = document.createElement('canvas')
 
     bwipjs.toCanvas(canvas, {
-      bcid: 'datamatrix',
+      bcid: REVIEW_CODE_TYPE,
       paddingheight: 4,
       paddingwidth: 4,
       scale: 12,
       text: card.url,
+      ...(REVIEW_CODE_TYPE === 'qrcode' && { eclevel: 'M' }),
     })
 
     const link = document.createElement('a')
@@ -96,7 +97,7 @@ function StaffCodesPage() {
             Review Codes
           </h2>
           <p className={`mt-1 text-xs font-semibold uppercase ${theme.classes.subtle}`}>
-            Data Matrix per staff member
+            QR code per staff member
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -118,11 +119,11 @@ function StaffCodesPage() {
           <button
             className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold shadow-lg transition hover:brightness-105 disabled:opacity-60 ${theme.classes.primaryButton}`}
             disabled={cards.length === 0}
-            onClick={() => setPrintJob({ members: cards, single: false })}
+            onClick={() => setPrintJob({ members: cards })}
             type="button"
           >
             <Printer size={17} />
-            Print all (6 per A4 page)
+            Print all (1 per A4 page)
           </button>
         </div>
       </div>
@@ -144,7 +145,7 @@ function StaffCodesPage() {
               className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm"
               key={card.key}
             >
-              <DataMatrixCode
+              <ReviewCode
                 className="h-auto w-40 max-w-full [image-rendering:pixelated]"
                 scale={6}
                 text={card.url}
@@ -161,7 +162,7 @@ function StaffCodesPage() {
               <div className="flex flex-wrap justify-center gap-2">
                 <button
                   className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-medium transition ${theme.classes.tableToolbarButton}`}
-                  onClick={() => setPrintJob({ members: [card], single: true })}
+                  onClick={() => setPrintJob({ members: [card] })}
                   type="button"
                 >
                   <Printer size={14} />
@@ -182,7 +183,7 @@ function StaffCodesPage() {
       )}
 
       {printJob && (
-        <ReviewCodePrintSheet members={printJob.members} single={printJob.single} />
+        <ReviewCodePrintSheet members={printJob.members} />
       )}
     </section>
   )
