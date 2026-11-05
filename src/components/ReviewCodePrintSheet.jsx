@@ -49,8 +49,8 @@ const printCss = `
   .rcp-rule span:nth-child(2) { width: 14mm; background: #fce014; }
   .rcp-rule span:nth-child(3) { width: 14mm; background: #10a048; }
 
-  .rcp-name { font-size: 26pt; font-weight: 700; line-height: 1.2; color: ${BRAND_BLUE}; }
-  .rcp-dept { margin-top: 1.5mm; font-size: 15pt; color: #475569; }
+  /* For now the card names the department only, not the staff member. */
+  .rcp-dept { font-size: 26pt; font-weight: 700; line-height: 1.2; color: ${BRAND_BLUE}; }
 
   .rcp-codebox {
     box-sizing: content-box; width: 92mm; padding: 5mm;
@@ -75,10 +75,7 @@ function Card({ member }) {
           <span />
           <span />
         </div>
-        <div>
-          <div className="rcp-name">{member.name}</div>
-          {member.department && <div className="rcp-dept">{member.department}</div>}
-        </div>
+        {member.department && <div className="rcp-dept">{member.department}</div>}
         <div className="rcp-codebox">
           <ReviewCode scale={8} text={member.url} />
         </div>

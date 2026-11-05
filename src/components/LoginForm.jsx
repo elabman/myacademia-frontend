@@ -1,6 +1,5 @@
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import Logo from './Logo'
 import { theme } from '../theme'
 
@@ -127,9 +126,6 @@ function LoginForm({ onLogin }) {
               />
               <span className={theme.classes.bodyText}>Remember me</span>
             </label>
-            <Link className={`font-medium ${theme.classes.link}`} to="/forgot-password">
-              Forgot Password?
-            </Link>
           </div>
 
           <button

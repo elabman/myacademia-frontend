@@ -1,7 +1,7 @@
 import LoginIllustration from './LoginIllustration'
 import { theme } from '../theme'
 
-// The two-column card shared by the login, forgot-password and reset-password pages.
+// The two-column card used by the login page.
 function AuthLayout({ children }) {
   return (
     <main

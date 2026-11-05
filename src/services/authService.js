@@ -29,24 +29,6 @@ export async function logoutUser(accessToken) {
   })
 }
 
-export async function requestPasswordReset(email) {
-  const payload = await apiRequest('/auth/forgot-password', {
-    body: { email },
-    method: 'POST',
-  })
-
-  return payload?.message
-}
-
-export async function resetPassword(token, newPassword) {
-  const payload = await apiRequest('/auth/reset-password', {
-    body: { newPassword, token },
-    method: 'POST',
-  })
-
-  return payload?.message
-}
-
 export async function changePassword(accessToken, currentPassword, newPassword) {
   const payload = await apiRequest('/auth/change-password', {
     accessToken,
