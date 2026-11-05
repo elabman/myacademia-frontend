@@ -6,6 +6,7 @@ import {
   FileText,
   FolderKanban,
   Home,
+  KeyRound,
   LogOut,
   Menu,
   Settings,
@@ -13,7 +14,7 @@ import {
   X,
 } from 'lucide-react'
 import { useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import Logo from '../components/Logo'
 import { theme } from '../theme'
 
@@ -122,6 +123,10 @@ function getPageTitle(pathname) {
 
   if (pathname === '/dashboard/partners' || pathname === '/dashboard/donors') {
     return 'Partners'
+  }
+
+  if (pathname === '/dashboard/account/password') {
+    return 'Change Password'
   }
 
   if (pathname === '/dashboard/admin') {
@@ -280,6 +285,14 @@ function Topbar({ onLogout, onOpenSidebar, title, user }) {
                   </p>
                 </div>
                 <div className="py-1">
+                  <Link
+                    className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition ${theme.classes.tableRowHover} ${theme.classes.bodyText}`}
+                    onClick={() => setIsDropdownOpen(false)}
+                    to="/dashboard/account/password"
+                  >
+                    <KeyRound size={16} />
+                    Change password
+                  </Link>
                   <button
                     type="button"
                     className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition ${theme.classes.tableRowHover} ${theme.classes.dangerText}`}

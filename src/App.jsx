@@ -7,6 +7,9 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import AdminPage from './pages/AdminPage'
+import ChangePasswordPage from './pages/ChangePasswordPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import AcademicYearsPage from './pages/AcademicYearsPage'
 import ApprovalsPage from './pages/ApprovalsPage'
 import AuditLogPage from './pages/AuditLogPage'
@@ -97,6 +100,8 @@ function App() {
             }
           />
           <Route path="/review/:staffId" element={<PublicReviewPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
             path="/dashboard"
             element={
@@ -143,6 +148,7 @@ function App() {
               path="donors"
               element={<Navigate replace to="/dashboard/partners" />}
             />
+            <Route path="account/password" element={<ChangePasswordPage />} />
             <Route path="admin" element={<AdminPage />} />
             <Route path="admin/users" element={<UsersPage />} />
             <Route path="admin/departments" element={<DepartmentsPage />} />
