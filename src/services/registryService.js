@@ -642,7 +642,9 @@ function normalizeProject(project) {
 
 function normalizeShortCourse(course) {
   return {
-    id: value(course, ['id', 'short_course_id', 'sn']),
+    // The API names the key course_id. It must come before sn: sn is only a display number and
+    // is empty for courses created in the web form, which used to turn the id into "-".
+    id: value(course, ['id', 'short_course_id', 'course_id', 'sn']),
     courseId: optionalValue(course, ['course_id', 'id', 'short_course_id']),
     sn: value(course, ['sn', 'serial_number', 'id', 'short_course_id']),
     createdAt: optionalValue(course, ['createdAt', 'created_at', 'created_date']),
