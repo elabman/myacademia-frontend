@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build output and local settings are never committed: the server builds its own dist/,
+# and the API address defaults to /api/v1 (see .env.example).
+dist
+.env
+.env.production
+
