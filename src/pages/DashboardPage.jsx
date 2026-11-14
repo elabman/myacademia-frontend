@@ -73,6 +73,10 @@ function DashboardPage({ onLogout, user }) {
 }
 
 function getPageTitle(pathname) {
+  if (pathname.match(/^\/dashboard\/short-courses\/[^/]+\/application$/)) {
+    return 'Application Form'
+  }
+
   if (pathname === '/dashboard/projects/new') {
     return 'New Project'
   }
@@ -123,6 +127,14 @@ function getPageTitle(pathname) {
 
   if (pathname === '/dashboard/partners' || pathname === '/dashboard/donors') {
     return 'Partners'
+  }
+
+  if (pathname.match(/^\/dashboard\/forms\/[^/]+\/responses$/)) {
+    return 'Form Responses'
+  }
+
+  if (pathname.startsWith('/dashboard/forms/')) {
+    return 'Form Builder'
   }
 
   if (pathname === '/dashboard/account/password') {

@@ -643,6 +643,7 @@ function normalizeProject(project) {
 function normalizeShortCourse(course) {
   return {
     id: value(course, ['id', 'short_course_id', 'sn']),
+    courseId: optionalValue(course, ['course_id', 'id', 'short_course_id']),
     sn: value(course, ['sn', 'serial_number', 'id', 'short_course_id']),
     createdAt: optionalValue(course, ['createdAt', 'created_at', 'created_date']),
     title: value(course, ['title', 'course_title']),

@@ -188,7 +188,8 @@ export function exportCsv({ columns, filters, rows, title }) {
   return filters
 }
 
-export async function exportPdf({ columns, filters, rows, title }) {
+export async function exportPdf({ columns: allColumns, filters, pdfColumns, rows, title }) {
+  const columns = pdfColumns ?? allColumns
   const [{ jsPDF }, { default: autoTable }] = await Promise.all([
     import('jspdf'),
     import('jspdf-autotable'),

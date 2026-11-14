@@ -24,6 +24,7 @@ function RegistryTable({
   onDeleteRow,
   onRefresh,
   quickColumns,
+  rowActions,
   rows,
   title,
 }) {
@@ -189,6 +190,7 @@ function RegistryTable({
                   onDeleteRow={onDeleteRow}
                   quickColumnEntries={quickColumnEntries}
                   row={row}
+                  rowActions={rowActions}
                   rowNumber={index + 1}
                 />
               ))}
@@ -248,6 +250,7 @@ function TableRow({
   onDeleteRow,
   quickColumnEntries,
   row,
+  rowActions,
   rowNumber,
 }) {
   const rowId = row.id ?? row.sn
@@ -284,6 +287,7 @@ function TableRow({
               <Trash2 size={15} />
             </button>
           )}
+          {rowActions?.(row)}
         </div>
       </td>
       {quickColumnEntries.map(([key]) => (

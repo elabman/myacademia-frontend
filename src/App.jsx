@@ -7,6 +7,10 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import AdminPage from './pages/AdminPage'
+import FormBuilderPage from './pages/FormBuilderPage'
+import FormResponsesPage from './pages/FormResponsesPage'
+import ShortCourseApplicationPage from './pages/ShortCourseApplicationPage'
+import PublicFormPage from './pages/PublicFormPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import AcademicYearsPage from './pages/AcademicYearsPage'
 import ApprovalsPage from './pages/ApprovalsPage'
@@ -98,6 +102,7 @@ function App() {
             }
           />
           <Route path="/review/:staffId" element={<PublicReviewPage />} />
+          <Route path="/apply/:slug" element={<PublicFormPage />} />
           <Route
             path="/dashboard"
             element={
@@ -144,6 +149,12 @@ function App() {
               path="donors"
               element={<Navigate replace to="/dashboard/partners" />}
             />
+            <Route
+              path="short-courses/:courseId/application"
+              element={<ShortCourseApplicationPage />}
+            />
+            <Route path="forms/:formId" element={<FormBuilderPage />} />
+            <Route path="forms/:formId/responses" element={<FormResponsesPage />} />
             <Route path="account/password" element={<ChangePasswordPage />} />
             <Route path="admin" element={<AdminPage />} />
             <Route path="admin/users" element={<UsersPage />} />

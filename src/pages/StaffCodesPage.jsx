@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ReviewCode from '../components/ReviewCode'
 import ReviewCodePrintSheet from '../components/ReviewCodePrintSheet'
+import logo from '../assets/images/kigali-college-logo.png'
 import { useAuth } from '../hooks/useAuth'
 import { listStaff } from '../services/registryService'
 import { mockStaff, shouldUseMock } from '../services/reviewMock'
@@ -52,19 +53,43 @@ function StaffCodesPage() {
     [staff],
   )
 
-  // Print once the sheet (and its canvases) are on the page, then clear it afterwards.
+  // Start downloading the logo as soon as the page opens, so it is already cached
+  // when someone prints (it is the biggest file on the card).
+  useEffect(() => {
+    new Image().src = logo
+  }, [])
+
+  // Print once the sheet is on the page and its images are decoded. Printing straight
+  // away shows a blank logo when the file is still downloading (slow connections), so
+  // wait for the images (at most a few seconds), then clear the sheet afterwards.
   useEffect(() => {
     if (!printJob) {
       return undefined
     }
 
+    let isActive = true
     const clear = () => setPrintJob(null)
-    const timeoutId = window.setTimeout(() => window.print(), 200)
+
+    const printWhenReady = async () => {
+      // Let React draw the QR canvases first.
+      await new Promise((resolve) => window.setTimeout(resolve, 150))
+
+      const images = [...document.querySelectorAll('.rcp-sheet img')]
+      const decoded = Promise.all(images.map((image) => image.decode().catch(() => {})))
+      const timeout = new Promise((resolve) => window.setTimeout(resolve, 5000))
+
+      await Promise.race([decoded, timeout])
+
+      if (isActive) {
+        window.print()
+      }
+    }
 
     window.addEventListener('afterprint', clear)
+    printWhenReady()
 
     return () => {
-      window.clearTimeout(timeoutId)
+      isActive = false
       window.removeEventListener('afterprint', clear)
     }
   }, [printJob])
