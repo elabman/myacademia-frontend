@@ -108,14 +108,18 @@ export function mockReviewTarget(staffId) {
   return { demo: true, staff, services: readStore().services }
 }
 
-export function mockSubmitReview(data) {
+export function mockSubmitReview({ other_service_name: otherServiceName, ...data }) {
   const store = readStore()
   const staff = mockReviewTarget(data.staff_id).staff
   const service = store.services.find(
     (item) => String(item.service_id) === String(data.service_id),
   )
+  const comment = service?.name === 'Other'
+    ? [`Service: ${otherServiceName}`, data.comment].filter(Boolean).join('\n\n')
+    : data.comment
   const review = {
     ...data,
+    comment,
     created_at: new Date().toISOString(),
     review_id: Date.now(),
     service_name: service?.name,

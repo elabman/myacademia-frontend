@@ -11,6 +11,7 @@ function PublicReviewPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [otherServiceName, setOtherServiceName] = useState('')
   const [rating, setRating] = useState(null)
   const [reviewerName, setReviewerName] = useState('')
   const [serviceId, setServiceId] = useState('')
@@ -31,7 +32,15 @@ function PublicReviewPage() {
 
   const staff = target?.staff ?? target
   const services = target?.services ?? []
-  const canSubmit = Boolean(serviceId && rating) && !isSubmitting
+  const orderedServices = [...services].sort(
+    (first, second) => Number(first.name === 'Other') - Number(second.name === 'Other'),
+  )
+  const selectedService = services.find(
+    (service) => String(service.service_id ?? service.id) === serviceId,
+  )
+  const isOtherService = selectedService?.name === 'Other'
+  const canSubmit = Boolean(selectedService && rating) &&
+    (!isOtherService || Boolean(otherServiceName.trim())) && !isSubmitting
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -43,6 +52,7 @@ function PublicReviewPage() {
     try {
       await submitReview({
         comment: comment.trim() || null,
+        ...(isOtherService && { other_service_name: otherServiceName.trim() }),
         rating,
         reviewer_name: reviewerName.trim() || null,
         service_id: Number(serviceId),
@@ -106,7 +116,7 @@ function PublicReviewPage() {
                 value={serviceId}
               >
                 <option value="">Select a service</option>
-                {services.map((service) => (
+                {orderedServices.map((service) => (
                   <option
                     key={service.service_id ?? service.id}
                     value={service.service_id ?? service.id}
@@ -119,6 +129,21 @@ function PublicReviewPage() {
 
             {serviceId && (
               <div className="space-y-5">
+                {isOtherService && (
+                  <label className="block space-y-1.5">
+                    <span className="text-sm font-medium text-slate-800">Service name</span>
+                    <input
+                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-base text-slate-700 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                      maxLength={150}
+                      onChange={(event) => setOtherServiceName(event.target.value)}
+                      placeholder="Enter the service you received"
+                      required
+                      type="text"
+                      value={otherServiceName}
+                    />
+                  </label>
+                )}
+
                 <fieldset className="space-y-2">
                   <legend className="text-sm font-medium text-slate-800">
                     How was it?
