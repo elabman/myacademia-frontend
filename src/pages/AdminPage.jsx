@@ -4,6 +4,7 @@ import {
   ClipboardList,
   History,
   Layers,
+  Mail,
   MessageSquareText,
   QrCode,
   UploadCloud,
@@ -11,7 +12,6 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import ReviewNotificationSettings from '../components/ReviewNotificationSettings'
 import { useAuth } from '../hooks/useAuth'
 import { theme } from '../theme'
 
@@ -47,6 +47,13 @@ const adminItems = [
     to: '/dashboard/admin/reviews',
   },
   {
+    administratorOnly: true,
+    description: 'Manage email notifications for new reviews.',
+    icon: Mail,
+    label: 'Email',
+    to: '/dashboard/admin/email',
+  },
+  {
     description: 'Organise academic departments and codes.',
     icon: Building2,
     label: 'Departments',
@@ -80,6 +87,8 @@ const adminItems = [
 
 function AdminPage() {
   const { auth } = useAuth()
+  const isAdministrator = Number(auth?.user?.role_id) === 6
+  const visibleItems = adminItems.filter(({ administratorOnly }) => !administratorOnly || isAdministrator)
 
   return (
     <section className="space-y-4">
@@ -98,12 +107,8 @@ function AdminPage() {
         </p>
       </section>
 
-      {Number(auth?.user?.role_id) === 6 && (
-        <ReviewNotificationSettings accessToken={auth.accessToken} />
-      )}
-
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {adminItems.map(({ description, icon: Icon, label, to }) => (
+        {visibleItems.map(({ description, icon: Icon, label, to }) => (
           <Link
             className={`rounded-2xl border p-5 transition ${theme.classes.dashboardActionCard}`}
             key={to}

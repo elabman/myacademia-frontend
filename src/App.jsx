@@ -19,6 +19,7 @@ import AuditLogPage from './pages/AuditLogPage'
 import DashboardPage from './pages/DashboardPage'
 import DashboardHomePage from './pages/DashboardHomePage'
 import DepartmentsPage from './pages/DepartmentsPage'
+import EmailSettingsPage from './pages/EmailSettingsPage'
 import PatternerPage from './pages/PatternerPage'
 import LoginPage from './pages/LoginPage'
 import MouAgreementDetailPage from './pages/MouAgreementDetailPage'
@@ -238,6 +239,7 @@ function App() {
             <Route path="admin/staff-codes" element={<StaffCodesPage />} />
             <Route path="admin/services" element={<ServicesPage />} />
             <Route path="admin/reviews" element={<ReviewsPage />} />
+            <Route path="admin/email" element={<EmailSettingsPage />} />
             <Route path="admin/approvals" element={<ApprovalsPage />} />
             <Route path="admin/audit-log" element={<AuditLogPage />} />
             <Route path="admin/uploads" element={<UploadsPage />} />

@@ -145,6 +145,10 @@ function getPageTitle(pathname) {
     return 'Admin'
   }
 
+  if (pathname === '/dashboard/admin/email') {
+    return 'Email'
+  }
+
   if (pathname === '/dashboard/admin/users') {
     return 'Users'
   }
