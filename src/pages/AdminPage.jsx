@@ -11,6 +11,8 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import ReviewNotificationSettings from '../components/ReviewNotificationSettings'
+import { useAuth } from '../hooks/useAuth'
 import { theme } from '../theme'
 
 const adminItems = [
@@ -77,6 +79,8 @@ const adminItems = [
 ]
 
 function AdminPage() {
+  const { auth } = useAuth()
+
   return (
     <section className="space-y-4">
       <section
@@ -93,6 +97,10 @@ function AdminPage() {
           and audit records from one place.
         </p>
       </section>
+
+      {Number(auth?.user?.role_id) === 6 && (
+        <ReviewNotificationSettings accessToken={auth.accessToken} />
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {adminItems.map(({ description, icon: Icon, label, to }) => (

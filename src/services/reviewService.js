@@ -110,3 +110,15 @@ export function deleteService(accessToken, serviceId) {
     () => mockDeleteService(serviceId),
   )
 }
+
+export async function getReviewNotificationSettings(accessToken) {
+  return unwrapData(await apiRequest('/reviews/notification-settings', { accessToken }))
+}
+
+export async function saveReviewNotificationSettings(accessToken, settings) {
+  return unwrapData(await apiRequest('/reviews/notification-settings', {
+    accessToken,
+    body: settings,
+    method: 'PUT',
+  }))
+}
