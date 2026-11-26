@@ -35,6 +35,8 @@ function PublicReviewPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!canSubmit) return
+
     setErrorMessage('')
     setIsSubmitting(true)
 
@@ -115,71 +117,75 @@ function PublicReviewPage() {
               </select>
             </label>
 
-            <fieldset className="space-y-2">
-              <legend className="text-sm font-medium text-slate-800">
-                How was it?
-              </legend>
-              <div className="grid grid-cols-5 gap-2">
-                {reviewRatings.map((option) => (
-                  <button
-                    aria-pressed={rating === option.value}
-                    className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-3 transition ${
-                      rating === option.value
-                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/30'
-                        : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                    key={option.value}
-                    onClick={() => setRating(option.value)}
-                    type="button"
-                  >
-                    <span className="text-3xl leading-none">{option.emoji}</span>
-                    <span className="text-[10px] font-medium text-slate-600">
-                      {option.label}
-                    </span>
-                  </button>
-                ))}
+            {serviceId && (
+              <div className="space-y-5">
+                <fieldset className="space-y-2">
+                  <legend className="text-sm font-medium text-slate-800">
+                    How was it?
+                  </legend>
+                  <div className="grid grid-cols-5 gap-2">
+                    {reviewRatings.map((option) => (
+                      <button
+                        aria-pressed={rating === option.value}
+                        className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-3 transition ${
+                          rating === option.value
+                            ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/30'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}
+                        key={option.value}
+                        onClick={() => setRating(option.value)}
+                        type="button"
+                      >
+                        <span className="text-3xl leading-none">{option.emoji}</span>
+                        <span className="text-[10px] font-medium text-slate-600">
+                          {option.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <label className="block space-y-1.5">
+                  <span className="text-sm font-medium text-slate-800">
+                    Comment (optional)
+                  </span>
+                  <textarea
+                    className="w-full rounded-xl border border-slate-200 px-3 py-3 text-base text-slate-700 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                    maxLength={1000}
+                    onChange={(event) => setComment(event.target.value)}
+                    placeholder="Tell us more…"
+                    rows={4}
+                    value={comment}
+                  />
+                </label>
+
+                <label className="block space-y-1.5">
+                  <span className="text-sm font-medium text-slate-800">
+                    Your name (optional)
+                  </span>
+                  <input
+                    className="w-full rounded-xl border border-slate-200 px-3 py-3 text-base text-slate-700 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                    maxLength={100}
+                    onChange={(event) => setReviewerName(event.target.value)}
+                    value={reviewerName}
+                  />
+                </label>
+
+                {errorMessage && (
+                  <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {errorMessage}
+                  </p>
+                )}
+
+                <button
+                  className="w-full rounded-xl bg-gradient-to-r from-[#6d5df5] to-[#5647e0] px-4 py-3 text-base font-semibold text-white shadow-lg transition disabled:opacity-50"
+                  disabled={!canSubmit}
+                  type="submit"
+                >
+                  {isSubmitting ? 'Sending…' : 'Send review'}
+                </button>
               </div>
-            </fieldset>
-
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium text-slate-800">
-                Comment (optional)
-              </span>
-              <textarea
-                className="w-full rounded-xl border border-slate-200 px-3 py-3 text-base text-slate-700 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                maxLength={1000}
-                onChange={(event) => setComment(event.target.value)}
-                placeholder="Tell us more…"
-                rows={4}
-                value={comment}
-              />
-            </label>
-
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium text-slate-800">
-                Your name (optional)
-              </span>
-              <input
-                className="w-full rounded-xl border border-slate-200 px-3 py-3 text-base text-slate-700 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                maxLength={100}
-                onChange={(event) => setReviewerName(event.target.value)}
-                value={reviewerName}
-              />
-            </label>
-
-            {errorMessage && (
-              <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {errorMessage}
-              </p>
             )}
-
-            <button
-              className="w-full rounded-xl bg-gradient-to-r from-[#6d5df5] to-[#5647e0] px-4 py-3 text-base font-semibold text-white shadow-lg transition disabled:opacity-50"
-              disabled={!canSubmit}
-              type="submit"
-            >
-              {isSubmitting ? 'Sending…' : 'Send review'}
-            </button>
           </form>
         )}
       </div>

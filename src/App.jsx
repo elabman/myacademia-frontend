@@ -11,6 +11,7 @@ import FormBuilderPage from './pages/FormBuilderPage'
 import FormResponsesPage from './pages/FormResponsesPage'
 import ShortCourseApplicationPage from './pages/ShortCourseApplicationPage'
 import PublicFormPage from './pages/PublicFormPage'
+import RequireNumericId from './components/RequireNumericId'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import AcademicYearsPage from './pages/AcademicYearsPage'
 import ApprovalsPage from './pages/ApprovalsPage'
@@ -116,8 +117,24 @@ function App() {
             <Route index element={<DashboardHomePage />} />
             <Route path="projects" element={<ProjectsPage />} />
             <Route path="projects/new" element={<ProjectFormPage />} />
-            <Route path="projects/:projectId/edit" element={<ProjectEditPage />} />
-            <Route path="projects/:projectId" element={<ProjectDetailPage />} />
+            <Route path="projects/:projectId/edit" element={
+                <RequireNumericId
+                  backLabel="Back to Projects"
+                  backTo="/dashboard/projects"
+                  param="projectId"
+                >
+                  <ProjectEditPage />
+                </RequireNumericId>
+              } />
+            <Route path="projects/:projectId" element={
+                <RequireNumericId
+                  backLabel="Back to Projects"
+                  backTo="/dashboard/projects"
+                  param="projectId"
+                >
+                  <ProjectDetailPage />
+                </RequireNumericId>
+              } />
             <Route path="short-courses" element={<ShortCoursesPage />} />
             <Route
               path="short-courses/new"
@@ -125,11 +142,27 @@ function App() {
             />
             <Route
               path="short-courses/:courseId/edit"
-              element={<ShortCourseEditPage />}
+              element={
+                <RequireNumericId
+                  backLabel="Back to Short Courses"
+                  backTo="/dashboard/short-courses"
+                  param="courseId"
+                >
+                  <ShortCourseEditPage />
+                </RequireNumericId>
+              }
             />
             <Route
               path="short-courses/:courseId"
-              element={<ShortCourseDetailPage />}
+              element={
+                <RequireNumericId
+                  backLabel="Back to Short Courses"
+                  backTo="/dashboard/short-courses"
+                  param="courseId"
+                >
+                  <ShortCourseDetailPage />
+                </RequireNumericId>
+              }
             />
             <Route path="mou-agreements" element={<MouAgreementsPage />} />
             <Route
@@ -138,11 +171,27 @@ function App() {
             />
             <Route
               path="mou-agreements/:mouId/edit"
-              element={<MouAgreementEditPage />}
+              element={
+                <RequireNumericId
+                  backLabel="Back to MoUs"
+                  backTo="/dashboard/mou-agreements"
+                  param="mouId"
+                >
+                  <MouAgreementEditPage />
+                </RequireNumericId>
+              }
             />
             <Route
               path="mou-agreements/:mouId"
-              element={<MouAgreementDetailPage />}
+              element={
+                <RequireNumericId
+                  backLabel="Back to MoUs"
+                  backTo="/dashboard/mou-agreements"
+                  param="mouId"
+                >
+                  <MouAgreementDetailPage />
+                </RequireNumericId>
+              }
             />
             <Route path="partners" element={<PatternerPage />} />
             <Route
@@ -151,10 +200,34 @@ function App() {
             />
             <Route
               path="short-courses/:courseId/application"
-              element={<ShortCourseApplicationPage />}
+              element={
+                <RequireNumericId
+                  backLabel="Back to Short Courses"
+                  backTo="/dashboard/short-courses"
+                  param="courseId"
+                >
+                  <ShortCourseApplicationPage />
+                </RequireNumericId>
+              }
             />
-            <Route path="forms/:formId" element={<FormBuilderPage />} />
-            <Route path="forms/:formId/responses" element={<FormResponsesPage />} />
+            <Route path="forms/:formId" element={
+                <RequireNumericId
+                  backLabel="Back to Short Courses"
+                  backTo="/dashboard/short-courses"
+                  param="formId"
+                >
+                  <FormBuilderPage />
+                </RequireNumericId>
+              } />
+            <Route path="forms/:formId/responses" element={
+                <RequireNumericId
+                  backLabel="Back to Short Courses"
+                  backTo="/dashboard/short-courses"
+                  param="formId"
+                >
+                  <FormResponsesPage />
+                </RequireNumericId>
+              } />
             <Route path="account/password" element={<ChangePasswordPage />} />
             <Route path="admin" element={<AdminPage />} />
             <Route path="admin/users" element={<UsersPage />} />
